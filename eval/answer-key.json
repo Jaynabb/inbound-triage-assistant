@@ -1,0 +1,76 @@
+{
+  "description": "Hand-built expected triage for the 13 sample messages. Written by the engineer BEFORE looking at model output, so it grades the model rather than describing it. This is the spec; the model is the implementation under test.",
+  "rules_applied": {
+    "priority": "Time pressure ONLY. high = deadline within ~72h, escalation/complaint, or at-risk relationship. medium = legitimate claim on the firm's time, no deadline named. low = no time pressure, nothing to action, or unsolicited inbound sales/recruiting/outreach.",
+    "value_signal": "Business value, judged separately from urgency, so a large opportunity is surfaced rather than smuggled into priority."
+  },
+  "expected": {
+    "inb-001": {
+      "category": "prospect",
+      "priority": "medium",
+      "why": "$8M liquidity event is high value, but he named no deadline and asked only 'who should I speak with'. Value belongs in value_signal."
+    },
+    "inb-002": {
+      "category": "existing_client",
+      "priority": "high",
+      "why": "Existing client with a stated Friday deadline driven by a third party (mortgage lender)."
+    },
+    "inb-003": {
+      "category": "vendor",
+      "priority": "low",
+      "why": "Unsolicited sales pitch. The vendor wanting a reply does not create urgency for the firm."
+    },
+    "inb-004": {
+      "category": "recruiter",
+      "priority": "low",
+      "why": "Unsolicited outreach. Neither buying nor selling a service; nothing at stake for the firm."
+    },
+    "inb-005": {
+      "category": "existing_client",
+      "priority": "high",
+      "why": "Existing client, disputed fee, explicit same-day callback request. Escalation and an at-risk relationship. Note: this message has NO subject line — the pre-filter must not penalise that."
+    },
+    "inb-006": {
+      "category": "prospect",
+      "priority": "low",
+      "why": "Genuine prospect, but she states 'no rush at all' herself. Self-declared absence of time pressure."
+    },
+    "inb-007": {
+      "category": "partner",
+      "priority": "medium",
+      "why": "Two-way revenue proposal, not a sale to the firm, so it has a legitimate claim on their time. No deadline, so not high."
+    },
+    "inb-008": {
+      "category": "spam",
+      "priority": "low",
+      "why": "Automated bulk newsletter. Nothing to action."
+    },
+    "inb-009": {
+      "category": "unclear",
+      "priority": "medium",
+      "why": "Valid fields, unknowable intent. Routes to a human on category regardless of priority."
+    },
+    "inb-010": {
+      "category": null,
+      "priority": null,
+      "expected_status": "skipped_malformed",
+      "why": "Body is a single '.' — no readable content. Should never reach the model."
+    },
+    "inb-011": {
+      "category": null,
+      "priority": null,
+      "expected_status": "skipped_malformed",
+      "why": "Null bytes, replacement characters, MIME boundary fragments. No readable content after stripping transport noise."
+    },
+    "inb-012": {
+      "category": "existing_client",
+      "priority": "medium",
+      "why": "Existing client, but 'sometime in the next few weeks' is not a deadline. This is the case that disproves 'existing clients are automatically high'."
+    },
+    "inb-013": {
+      "category": "prospect",
+      "priority": "medium",
+      "why": "Referred by an existing client, so high value and not unsolicited — but 'soon' is not a deadline. Structurally identical to inb-007."
+    }
+  }
+}

@@ -1,0 +1,204 @@
+{
+  "label": "haiku + few-shot (no leakage)",
+  "category": [
+    11,
+    11
+  ],
+  "priority": [
+    11,
+    11
+  ],
+  "disagreements": [],
+  "results": [
+    {
+      "id": "inb-001",
+      "status": "ok",
+      "result": {
+        "summary": "$8M business sale proceeds; seeking tax-efficient planning and family office setup",
+        "category": "prospect",
+        "priority": "medium",
+        "value_signal": "high",
+        "next_action": "Route to business development or senior advisor; schedule initial consultation to discuss tax planning and family office structure options.",
+        "confidence": 0.95,
+        "reasoning": "Clear prospect signal: individual with substantial liquid capital ($8M) seeking core services (tax-efficient planning, family office setup) that align with Northwind's mandate. No stated deadline, so medium priority despite high value. High confidence on category and value."
+      },
+      "note": null,
+      "latency_ms": 3070,
+      "repaired_from": null
+    },
+    {
+      "id": "inb-002",
+      "status": "ok",
+      "result": {
+        "summary": "Existing client needs updated portfolio statement by Friday for mortgage lender",
+        "category": "existing_client",
+        "priority": "high",
+        "value_signal": "low",
+        "next_action": "Pull Dana Whitfield's current portfolio statement and send to her by Thursday EOD to meet Friday lender deadline.",
+        "confidence": 0.95,
+        "reasoning": "Dana self-identifies as existing client with a hard deadline (Friday, ~5 days out). Mortgage lender requirement signals genuine time pressure. Administrative task with no new revenue, but at-risk relationship if not fulfilled."
+      },
+      "note": null,
+      "latency_ms": 3310,
+      "repaired_from": null
+    },
+    {
+      "id": "inb-003",
+      "status": "ok",
+      "result": {
+        "summary": "Lumen Analytics pitching portfolio analytics software demo",
+        "category": "vendor",
+        "priority": "low",
+        "value_signal": "low",
+        "next_action": "If interested in portfolio analytics tools, reply with availability; otherwise archive or decline politely.",
+        "confidence": 0.95,
+        "reasoning": "Cold outreach from software vendor seeking a demo. No stated deadline or pain point. Unsolicited sales pitch with generic \"next week\" availability request. Vendor category is clear; low priority because there is no time pressure and the firm has not indicated a need."
+      },
+      "note": null,
+      "latency_ms": 3537,
+      "repaired_from": null
+    },
+    {
+      "id": "inb-004",
+      "status": "ok",
+      "result": {
+        "summary": "Recruiter pitching senior role opportunity with unnamed client",
+        "category": "recruiter",
+        "priority": "low",
+        "value_signal": "none",
+        "next_action": "No action required. If the firm has hiring needs, reply; otherwise archive.",
+        "confidence": 0.95,
+        "reasoning": "Unsolicited recruiter outreach via LinkedIn. TalentBridge is recruiting for a client role, not selling services to or partnering with Northwind. No time pressure. Recruiting has no business value for an advisory firm."
+      },
+      "note": null,
+      "latency_ms": 4944,
+      "repaired_from": "reasoning: String must contain at most 300 character(s)"
+    },
+    {
+      "id": "inb-005",
+      "status": "ok",
+      "result": {
+        "summary": "Existing client disputes unexpected fee on statement; requests same-day callback",
+        "category": "existing_client",
+        "priority": "high",
+        "value_signal": "low",
+        "next_action": "Call Robert Ellison back today to discuss the disputed fee on his statement and resolve his concern.",
+        "confidence": 0.95,
+        "reasoning": "Self-identifies as current client with a complaint about a fee. Explicit same-day callback request creates time pressure. No new revenue at stake, but at-risk relationship and escalation tone warrant high priority. Confidence is high — intent and status are clear."
+      },
+      "note": null,
+      "latency_ms": 2550,
+      "repaired_from": null
+    },
+    {
+      "id": "inb-006",
+      "status": "ok",
+      "result": {
+        "summary": "Prospect inquiring about minimum account size and fee structure",
+        "category": "prospect",
+        "priority": "low",
+        "value_signal": "medium",
+        "next_action": "Send standard information packet on minimums and fee structure; offer a brief call if she wants to discuss further.",
+        "confidence": 0.85,
+        "reasoning": "Early-stage prospect exploring options with no time pressure. Asking standard qualification questions (minimum, fees). Legitimate potential client but no urgency or size signals yet."
+      },
+      "note": null,
+      "latency_ms": 4436,
+      "repaired_from": "reasoning: String must contain at most 300 character(s)"
+    },
+    {
+      "id": "inb-007",
+      "status": "ok",
+      "result": {
+        "summary": "RIA seeking referral partnership for out-of-scope client needs",
+        "category": "partner",
+        "priority": "medium",
+        "value_signal": "medium",
+        "next_action": "Have a partner manager call Jordan to understand Cedar Ridge's client profile, typical referral volume, and service gaps to assess fit.",
+        "confidence": 0.85,
+        "reasoning": "Jordan Massey from Cedar Ridge Wealth proposes a two-way referral relationship — a classic partner inquiry. RIAs with overflow clients are valuable deal-flow sources. No deadline stated, so medium priority. Medium value_signal because referral partnerships depend on volume and fit."
+      },
+      "note": null,
+      "latency_ms": 5326,
+      "repaired_from": "reasoning: String must contain at most 300 character(s)"
+    },
+    {
+      "id": "inb-008",
+      "status": "ok",
+      "result": {
+        "summary": "Automated market newsletter from Market Daily",
+        "category": "spam",
+        "priority": "low",
+        "value_signal": "none",
+        "next_action": "Delete or unsubscribe if unwanted",
+        "confidence": 0.95,
+        "reasoning": "Automated newsletter with unsubscribe footer. No personalization, no sender name, no business intent toward Northwind. Clear spam/bulk content."
+      },
+      "note": null,
+      "latency_ms": 1917,
+      "repaired_from": null
+    },
+    {
+      "id": "inb-009",
+      "status": "review",
+      "result": {
+        "summary": "Follow-up on prior conversation; next steps unclear",
+        "category": "unclear",
+        "priority": "medium",
+        "value_signal": "low",
+        "next_action": "Search email history for prior messages from Sam Cho to establish context and relationship type, then respond appropriately.",
+        "confidence": 0.35,
+        "reasoning": "Sam references a prior conversation but provides no context about who he is, what was discussed, or outcome sought. Could be prospect, client, vendor, or partner. Low confidence warrants human review to locate prior correspondence and clarify relationship."
+      },
+      "note": "model could not determine intent",
+      "latency_ms": 4519,
+      "repaired_from": "reasoning: String must contain at most 300 character(s)"
+    },
+    {
+      "id": "inb-010",
+      "status": "skipped_malformed",
+      "result": null,
+      "note": "no readable content after stripping transport noise",
+      "latency_ms": null
+    },
+    {
+      "id": "inb-011",
+      "status": "skipped_malformed",
+      "result": null,
+      "note": "no readable content after stripping transport noise",
+      "latency_ms": null
+    },
+    {
+      "id": "inb-012",
+      "status": "ok",
+      "result": {
+        "summary": "Existing client Helen Ortiz requesting quarterly review scheduling for next few weeks",
+        "category": "existing_client",
+        "priority": "medium",
+        "value_signal": "low",
+        "next_action": "Check Helen Ortiz's account calendar and send her 3–4 available morning slots within the next 2–3 weeks for her quarterly review",
+        "confidence": 0.95,
+        "reasoning": "Clear self-identification as existing client with a straightforward administrative request. \"Next few weeks\" is not a hard deadline (no specific date stated), so medium priority. Low value_signal as this is routine maintenance, not new revenue or risk. High confidence on category and intent."
+      },
+      "note": null,
+      "latency_ms": 2708,
+      "repaired_from": null
+    },
+    {
+      "id": "inb-013",
+      "status": "ok",
+      "result": {
+        "summary": "Prospect referred by existing client Dana Whitfield seeking family planning intro call",
+        "category": "prospect",
+        "priority": "medium",
+        "value_signal": "medium",
+        "next_action": "Schedule intro call with Nathan Brooks; confirm Dana Whitfield's referral in CRM",
+        "confidence": 0.92,
+        "reasoning": "Clear prospect: referred by named existing client, explicitly seeking comprehensive family planning, requesting intro call. No stated deadline, but referral from Dana adds credibility and medium value potential."
+      },
+      "note": null,
+      "latency_ms": 5793,
+      "repaired_from": "reasoning: String must contain at most 300 character(s)"
+    }
+  ]
+}
