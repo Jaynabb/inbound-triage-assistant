@@ -2,47 +2,43 @@
 
 ## a. Data & taxonomy
 
-The brief suggested four categories. I added three, because three messages in
-the sample didn't fit without losing something real.
+The brief suggested four categories. I added three, because three messages
+didn't fit.
 
-A recruiter doesn't belong in spam — they're neither buying nor selling, so
-they don't sit alongside a vendor or a newsletter either. A partnership inquiry
-doesn't belong in vendor: vendor means revenue going out, and a partnership is
-the opposite, revenue coming in. Filing `inb-007` under vendor would tell
-whoever reads the queue the opposite of the truth.
+A recruiter isn't spam. They're not selling anything and they're not buying
+anything, so they don't belong with a vendor or a newsletter either.
+
+A partnership isn't a vendor. Vendor means money going out. A partnership is
+the opposite, money coming in. If you file `inb-007` under vendor you're
+telling whoever reads the queue the opposite of what's true.
 
 I added `unclear` because of Sam Cho (`inb-009`). That email could easily be a
-legitimate follow-up about something he'd already discussed with the firm.
-Rather than guess, I'd rather route it to a human and let them connect the
-dots. `unclear` is a routing destination, not a failure.
+real follow up about something he already talked to the firm about. Rather than
+guess, I'd rather send it to a human and let them connect the dots.
 
-**Priority is based on how fast the firm needs to respond — to keep a
-relationship smooth and keep customers happy — rather than how fast someone
-wants a response from the firm.** Those come apart more often than you'd
-expect. The vendor in `inb-003` would love a reply next week and gets `low`,
-because nothing happens to the firm if he waits. Bob Ellison in `inb-005` is
-disputing a fee and wants a callback today, and that relationship degrades by
-the hour, so it's `high`.
+Priority is based on how fast the firm needs to respond to keep a relationship
+smooth and keep customers happy. Not how fast someone wants a response from the
+firm. Those two are different more often than you'd think. The vendor in
+`inb-003` would love a fast reply and gets low, because nothing happens to the
+firm if he waits. Bob Ellison in `inb-005` is angry about a fee and wants a call
+today, and that relationship gets worse by the hour, so he's high.
 
-Business value is a separate field (`value_signal`) rather than being folded
-into priority. That's why `inb-001` — $8M from a liquidity event, no deadline —
-is `priority: medium` with `value_signal: high`. If the two were one number,
-"high" would mean two different things and "why is this medium" would have no
-answer.
+Business value is a separate field. That's why `inb-001` — $8M, no deadline —
+is medium priority and high value. If they were one number, "high" would mean
+two different things and you couldn't answer why something is medium.
 
-**On extending it:** everything is defined in one spot in the TypeScript
-(`lib/schema.ts`). If you want to add a category — say `press`, because someone
-wants to write an article about the firm — you add it there, but it won't build
-until you also write the description of what `press` means and what kind of
-messages belong in it. So it serves as its own check and balance, while keeping
-everything centralized in one place for the system to pick up on.
+On adding more categories: everything is defined in one spot in the TypeScript
+(`lib/schema.ts`). If you want to add a category, say `press` because someone
+wants to write an article about the firm, you add it there. But it won't build
+until you also write the description of what press means and what kind of
+messages go in it. So it serves as its own check and balance, and everything
+stays in one place for the system to pick up.
 
-I actually did this while building: added `press`, got a compile error for the
-missing definition, wrote it, and the category then appeared in the validation
-enum, the tool schema sent to the API, the model's instructions, and the UI
-legend without my touching any of those files. I removed it again afterwards,
-because nothing in this queue is a press inquiry and shipping an unused
-category is scope I didn't need.
+I actually did this while building. I added `press`, got a build error for the
+missing description, wrote it, and then press showed up in the validation, the
+schema sent to the API, the model's instructions, and the UI legend without me
+touching any of those files. I took it back out after, because nothing in this
+queue is a press message and I didn't need the extra category.
 
 ## b. Reliable structure
 
@@ -50,11 +46,68 @@ _[to write]_
 
 ## c. Where the model was wrong
 
-_[to write]_
+The model got `inb-001` wrong. Gregory Palmer just sold his business and has
+$8M to invest, and he asks who he should speak with. He never says when he
+needs an answer. There's no sense of urgency about response time. The model
+marked it high priority anyway, and what it was reacting to was the $8 million.
+The prompt told it not to do that.
+
+I caught it because I built my own rules for urgency first and went through all
+13 messages by hand before I ran the model (`eval/answer-key.json`). That way my
+logic is the benchmark and the model gets graded against it, instead of the
+other way around. Doing it in that order also means I can't be talked into
+agreeing with the model after I see its answers.
+
+It made the same mistake on `inb-013` — a referral from an existing client, high
+value, no deadline, also marked high. Same direction both times. It never pushed
+a low value message up.
+
+The fix was adding examples to the prompt showing the difference between value
+and urgency. I did not use `inb-001` or `inb-013` as those examples. If the
+failing message is in the prompt, the answer is just part of the prompt rather
+than something the model had to figure out. Calculation versus regurgitation.
+Using made up examples meant that when it got `inb-001` right after, it was
+working it out on something it hadn't been shown.
+
+Priority went from 9/11 to 11/11 (`scripts/eval.mts`).
+
+That said, 11 messages is too small a sample to trust. Going from 9 right to 11
+right is two messages. It tells me the fix works on the problem I found. It
+doesn't tell me the system is right. Before I relied on it I'd want a few
+hundred labeled messages, and I'd track priority accuracy over time instead of
+quoting one number.
 
 ## d. Edge cases
 
-_[to write]_
+Two of the 13 messages never get sent to the model. `inb-010` is empty except
+for a single period. `inb-011` is a broken email — the text is scrambled and
+there's nothing readable in it.
+
+I stop those before the API call because sending them would cost money for no
+reason. With 13 messages that's nothing. At 10,000 a day it adds up.
+
+The important part is what the filter is allowed to look at. `inb-005` is also
+missing things — no subject, no company — but it's the most urgent message in
+the inbox. He's an existing client, he's angry about a fee, and he wants a call
+back today. He's a customer that's angry, and the last thing on his mind is
+adding a subject line. So a filter that throws out messages with missing fields
+would end up throwing away the angriest customers.
+
+That's why the filter only looks at the body. Not the subject, not the sender.
+A missing subject tells you nothing. An empty body tells you everything.
+
+The gap is wide, so the cutoff isn't a guess. The two junk messages have 0
+readable characters. The quietest real message has 67.
+`scripts/verify-signal.mts` checks this.
+
+The skipped messages still show up on screen with the reason. Nothing
+disappears.
+
+I also kept "skipped" and "error" as two separate statuses instead of one.
+That's to tell the difference between internal system errors and bad data
+coming from the customer side. Knowing which one you're looking at tells you how
+to fix it. Junk coming in is normal and you do nothing. Errors mean something on
+our end is broken.
 
 ## e. Scale & risk
 
