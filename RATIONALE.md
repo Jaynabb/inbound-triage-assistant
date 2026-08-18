@@ -111,4 +111,41 @@ our end is broken.
 
 ## e. Scale & risk
 
-_[to write]_
+Right now it's one API call per message. 13 messages takes about 10 seconds, so
+10,000 would take around 2 hours.
+
+But that 2 hours isn't really the problem. 10,000 a day is about 7 messages a
+minute, and the tool can already do about 80 a minute at 4 at a time. There's
+plenty of capacity. The problem is running it as a batch.
+
+If the tool runs at 8am and Bob sends his angry message at 9am, nobody sees it
+until the next morning. The one message that was actually time sensitive is the
+one the system is slowest on. That's backwards.
+
+The fix is to stop batching and trigger on arrival instead. n8n watches the
+inbox and fires the triage the moment a message lands, instead of a clock firing
+it once a day. Then Bob is flagged high within seconds of writing in.
+
+Only high priority gets pushed out to a person. If everything pushes, nothing is
+a signal and people start ignoring it.
+
+If volume ever got past what the tool can handle, that's when I'd add a cheap
+first pass to rank messages before the full triage. At this size it isn't
+needed, and I'd rather not build it until it is.
+
+**The biggest risk is the model marking a real client as spam.** They never get
+a response and the firm loses them. That's the worst failure because it's
+silent. If it wrongly calls a vendor a client, someone notices — there's a
+client in the queue who isn't one. If it calls a client spam, nobody ever finds
+out. Errors you can see are cheap. Errors you can't see aren't.
+
+The fix is to stop asking the model to guess something the firm already knows.
+Right now it decides `existing_client` by reading the text — Bob says he's a
+client, so it believes him. But the firm has a list of its clients. Match the
+sender's email against that list and it's a fact, not a guess. Use the model for
+judgment — intent, urgency, tone. Use the database for facts.
+
+The second risk is alerting. If the model is wrong about priority and it pings
+someone's phone, it cries wolf and people start ignoring it. That's why only
+high pushes, and why I'd want priority accuracy tracked over time in production
+rather than trusting one number off 11 messages.
