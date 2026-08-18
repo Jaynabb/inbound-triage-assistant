@@ -1,0 +1,18 @@
+node_modules/
+.next/
+out/
+build/
+
+# Secrets — never commit. .env.example is the committed template.
+.env
+.env.local
+.env*.local
+
+# Benchmark output can be regenerated; the committed summary lives in RATIONALE.md
+outputs/*.raw.json
+
+.DS_Store
+*.log
+
+# Working notes — folded into RATIONALE.md, not a deliverable
+NOTES.md
