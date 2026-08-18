@@ -119,13 +119,22 @@ if (disagreements.length) {
   console.log("\nno disagreements.");
 }
 
-const repaired = results.filter((r) => r.repaired_from);
-if (repaired.length) {
-  console.log(
-    `\nschema repairs: ${repaired.length}/${results.filter((r) => r.latency_ms !== null).length} calls needed a corrective retry`,
-  );
-  for (const r of repaired) console.log(`  ${r.id}: ${r.repaired_from}`);
-}
+const called = results.filter((r) => r.latency_ms !== null).length;
+
+// Deliberately reported as two separate numbers. Retries cost an extra API
+// call; truncations cost nothing. Tiering the validation was meant to convert
+// the first into the second, and one combined counter would hide that entirely.
+const retried = results.filter((r) => r.repaired_from);
+const truncated = results.filter((r) => r.truncations?.length);
+
+console.log(
+  `\nretries (extra API call):  ${retried.length}/${called}` +
+    (retried.length ? "" : "   ← none"),
+);
+for (const r of retried) console.log(`    ${r.id}: ${r.repaired_from}`);
+
+console.log(`truncations (free):        ${truncated.length}/${called}`);
+for (const r of truncated) console.log(`    ${r.id}: ${r.truncations!.join(", ")}`);
 
 const savePath = flag("save");
 if (savePath) {

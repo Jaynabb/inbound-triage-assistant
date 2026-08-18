@@ -67,6 +67,41 @@ function getClient(): Anthropic {
   return new Anthropic({ apiKey });
 }
 
+/**
+ * Cosmetic fields are repaired, not rejected.
+ *
+ * Tiered by consequence:
+ *   - category / priority / value_signal DRIVE ROUTING. A wrong value sends a
+ *     client to the wrong queue, so these hard-fail and trigger a retry.
+ *   - summary / reasoning are DISPLAY ONLY. An over-long explanation is a
+ *     cosmetic defect. Rejecting an otherwise-correct triage over it — and
+ *     paying for another API call — is the wrong severity of response.
+ *
+ * Measured motivation: after few-shot examples were added, 5 of 11 calls (45%)
+ * overran the reasoning limit. Every one was otherwise correct.
+ */
+const COSMETIC_LIMITS = [
+  ["summary", 200],
+  ["reasoning", 300],
+] as const;
+
+function repairCosmetic(input: unknown): { value: unknown; repairs: string[] } {
+  if (typeof input !== "object" || input === null) {
+    return { value: input, repairs: [] };
+  }
+  const obj = { ...(input as Record<string, unknown>) };
+  const repairs: string[] = [];
+
+  for (const [field, max] of COSMETIC_LIMITS) {
+    const v = obj[field];
+    if (typeof v === "string" && v.length > max) {
+      obj[field] = v.slice(0, max - 1).trimEnd() + "…";
+      repairs.push(`${field} truncated ${v.length}→${max}`);
+    }
+  }
+  return { value: obj, repairs };
+}
+
 /** Pull the tool_use input out of a response, or explain why we couldn't. */
 function extractToolInput(
   message: Anthropic.Message,
@@ -155,9 +190,18 @@ export async function triageOne(
       if (!extracted.ok) {
         lastProblem = extracted.reason;
       } else {
-        const parsed = TriageResultSchema.safeParse(extracted.input);
+        // Repair cosmetic overruns first, so only routing-field defects can
+        // cost a retry.
+        const { value: repairedInput, repairs } = repairCosmetic(extracted.input);
+        const parsed = TriageResultSchema.safeParse(repairedInput);
         if (parsed.success) {
-          return finalise(item.id, parsed.data, Date.now() - started, firstProblem);
+          return finalise(
+            item.id,
+            parsed.data,
+            Date.now() - started,
+            firstProblem,
+            repairs,
+          );
         }
         lastProblem = parsed.error.issues
           .map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`)
@@ -241,6 +285,7 @@ function finalise(
   result: TriageResult,
   latency_ms: number,
   repaired_from: string | null = null,
+  truncations: string[] = [],
 ): TriagedItem {
   const needsReview =
     result.confidence < CONFIDENCE_FLOOR || result.category === "unclear";
@@ -255,6 +300,7 @@ function finalise(
       : null,
     latency_ms,
     repaired_from,
+    truncations,
   };
 }
 

@@ -124,9 +124,17 @@ export interface TriagedItem {
   /** Milliseconds for the model call. Null when we never called. */
   latency_ms: number | null;
   /**
-   * Set when the first attempt failed zod validation and the corrective retry
-   * succeeded. Carries the original validation error, so the repair rate and
-   * the specific failure modes are observable rather than silently swallowed.
+   * Set when the first attempt failed validation on a ROUTING field and the
+   * corrective retry succeeded. Costs a second API call, so this is the
+   * expensive repair and is tracked separately from truncation below.
    */
   repaired_from?: string | null;
+
+  /**
+   * Cosmetic fields trimmed to their limits (display-only, costs nothing).
+   * Deliberately NOT merged with repaired_from: the point of tiering the
+   * validation was to convert expensive retries into free truncations, and a
+   * single combined counter would hide exactly that.
+   */
+  truncations?: string[];
 }
