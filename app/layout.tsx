@@ -1,3 +1,5 @@
+import "./globals.css";
+
 export const metadata = {
   title: "Inbound Triage Assistant",
   description: "LLM triage for the Northwind Advisors shared inbox",
