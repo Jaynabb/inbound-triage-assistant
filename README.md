@@ -108,28 +108,29 @@ that's a question rather than an assumption.
 
 ## How I used AI
 
-Heavily, throughout — Claude Code for the build, Claude for the triage itself.
-The parts I spent real time on were the decisions: what the categories should
-be, what priority actually means, what to do when the model breaks its contract,
-and building the answer key by hand before letting the model near it.
+I used it the whole way through. Claude Code to build it, Claude for the triage
+itself. What I spent my own time on was the decisions: what the categories
+should be, what priority actually means, what to do when the model breaks the
+rules, and building the answer key by hand before I let the model near it.
 
-**Where I overrode it:** while working out the n8n automation, the assistant
-drafted a step that notified the owning advisor over Slack. I stopped it,
-because nothing in the job description or the brief mentions Slack — the stack
-they name is Airtable, n8n/Zapier and a CRM. It had invented a tool the customer
-never mentioned, and it read as perfectly reasonable.
+**Where I overrode it.** While we were working out the n8n automation, it wrote
+a step that sends a Slack message to the advisor. I stopped it, because Slack
+isn't mentioned anywhere in the job description or the brief. The tools listed
+are Airtable, n8n, Zapier and a CRM. It added a tool nobody said they use.
 
-That's the failure mode worth watching for. It wasn't a wrong fact I could catch
-by knowing better; it was a confident, plausible detail with nothing behind it.
-Checking it against the source took ten seconds. The fix was to describe what
-should happen and leave the channel as a question for the client — which is a
-better answer anyway, especially walking into someone else's stack as the only
-engineer.
+That's the thing to watch for. It wasn't wrong in a way I'd catch by knowing
+more about the subject. It just sounded right. Checking it against what was
+actually written took ten seconds.
 
-_(A second one, if useful: the assistant capped the model's `reasoning` field at
-300 characters. I asked where the number came from and pushed back that trimming
-an explanation could cut important context. It couldn't defend the limit, so we
-removed it. Written up in RATIONALE (b).)_
+So I took the channel out and said the notification goes to whoever owns that
+client, through whatever the firm already uses. That's a better answer anyway. I
+don't know what they run on, and asking beats guessing when you're the only
+engineer walking into someone else's setup.
+
+_(Second one if it's useful: it capped the model's `reasoning` field at 300
+characters. I asked where that number came from, and said trimming an
+explanation could cut out important context. It couldn't defend the limit, so we
+dropped it. That's written up in RATIONALE (b).)_
 
 ## Notes
 
