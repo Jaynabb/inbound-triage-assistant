@@ -13,8 +13,9 @@ export default function Page() {
     readFileSync(join(process.cwd(), "data", "inbound.json"), "utf8"),
   );
 
-  // The sample queue is a single day's mail; take the date from the data
-  // rather than from the clock, so the header describes what's on screen.
+  // The sample queue is one day's mail. The date comes from the data, not the
+  // clock, so the header describes what's actually on screen — and it's
+  // labelled as the inbox date so it doesn't read as a stale timestamp.
   const day = new Date(items[0]?.received_at ?? Date.now()).toLocaleDateString(
     "en-US",
     { weekday: "short", month: "short", day: "numeric" },
@@ -26,7 +27,7 @@ export default function Page() {
         <h1 className="firm">Northwind Advisors</h1>
         <div className="masthead-sub">
           <span>Shared inbox · triage</span>
-          <span>{day}</span>
+          <span>Inbox of {day}</span>
         </div>
       </header>
 

@@ -37,6 +37,9 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
   const [meta, setMeta] = useState<Meta | null>(null);
   const [running, setRunning] = useState(false);
   const [fatal, setFatal] = useState<string | null>(null);
+  /* When this run finished. Set on the client after the fetch resolves, so
+     there's no server/client hydration mismatch on an SSR'd timestamp. */
+  const [ranAt, setRanAt] = useState<string | null>(null);
 
   async function run() {
     setRunning(true);
@@ -52,6 +55,12 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
       for (const r of body.results as TriagedItem[]) byId[r.id] = r;
       setResults(byId);
       setMeta(body.meta);
+      setRanAt(
+        new Date().toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+        }),
+      );
     } catch (err) {
       setFatal(err instanceof Error ? err.message : String(err));
     } finally {
@@ -89,7 +98,11 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
 
         <span className="spacer" />
 
-        {meta && <span className="elapsed">{(meta.elapsed_ms / 1000).toFixed(1)}s</span>}
+        {meta && (
+          <span className="elapsed">
+            Triaged {ranAt} · {(meta.elapsed_ms / 1000).toFixed(1)}s
+          </span>
+        )}
 
         <button className="run" onClick={run} disabled={running}>
           {running ? "Reading…" : bands ? "Run again" : "Triage the inbox"}
