@@ -73,16 +73,19 @@ function getClient(): Anthropic {
  * Tiered by consequence:
  *   - category / priority / value_signal DRIVE ROUTING. A wrong value sends a
  *     client to the wrong queue, so these hard-fail and trigger a retry.
- *   - summary / reasoning are DISPLAY ONLY. An over-long explanation is a
- *     cosmetic defect. Rejecting an otherwise-correct triage over it — and
- *     paying for another API call — is the wrong severity of response.
+ *   - summary / next_action are ONE-LINE DISPLAY fields, rendered inline and
+ *     always visible. The brief asks for a one-line summary, so the limit comes
+ *     from the requirement rather than from me. An overrun here is cosmetic —
+ *     trim it rather than pay for another API call.
  *
- * Measured motivation: after few-shot examples were added, 5 of 11 calls (45%)
- * overran the reasoning limit. Every one was otherwise correct.
+ * `reasoning` is deliberately NOT in this list and has no cap. It's the audit
+ * trail, the UI collapses it behind a toggle, and trimming an explanation drops
+ * the qualifier at the end — which makes the record misleading rather than
+ * merely long. See the note in schema.ts.
  */
 const COSMETIC_LIMITS = [
   ["summary", 200],
-  ["reasoning", 300],
+  ["next_action", 200],
 ] as const;
 
 function repairCosmetic(input: unknown): { value: unknown; repairs: string[] } {

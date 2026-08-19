@@ -42,7 +42,52 @@ queue is a press message and I didn't need the extra category.
 
 ## b. Reliable structure
 
-_[to write]_
+Instead of asking the model a question and hoping the answer comes back tidy, I
+hand it a form with six boxes and make it fill them in. That's tool use
+(`lib/triage.ts`, `tool_choice`). The API makes sure every field is there, the
+types are right, and the category is always one of my seven. It can't write me
+a paragraph instead.
+
+But the form only guarantees the boxes get filled. It doesn't guarantee what's
+in them follows the rules. A summary that's supposed to be one line can come
+back as four and still be perfectly valid JSON. So I don't depend on the form
+alone — a second layer checks the answer against what it should have been
+(`TriageResultSchema` in `lib/schema.ts`), and that makes the whole thing more
+dependable.
+
+When the check fails, what happens depends on which box was wrong.
+
+`summary` and `next_action` are one-line fields shown inline on every row. If
+one runs long I trim it and move on. I'm not making anything up — the words are
+still the model's, I just cut the end off. No extra call needed.
+
+The category box is different. That decides where the message goes and who sees
+it. If the model puts something invalid there, I don't pick one myself, because
+that's guessing and passing it off as a real answer. A bad guess from me does
+the same damage as a bad guess from the model, except now nothing looks broken
+so nobody checks. Instead it goes back to the model with the specific problem
+and gets re-analyzed. If it fails again the message is marked as an error and
+shows on screen, instead of the app pretending it worked.
+
+**The rule is: if a field only gets read, fix it quietly. If a field decides
+where something goes, never guess.**
+
+**One thing I changed my mind about.** I originally capped `reasoning` at 300
+characters too, and treated it as another trim-if-long field. The model
+consistently wanted 320–370, so the cap tripped on 3 of 11 messages and every
+one of those was otherwise correct. When I looked at why I'd set the limit, the
+reason didn't hold up: `reasoning` is the audit trail, it's what a person reads
+to check whether a triage was sound, and the UI already collapses it behind a
+toggle so length costs nothing on screen. Worse, trimming an explanation cuts
+the end, and the qualifier tends to live at the end. That makes the record
+misleading, which is worse than long. So I removed the cap. It was my
+constraint, not a real one, and the model was right to fight it.
+
+**One bug I only found by running it.** The first version of the retry sent a
+plain text message back to the model. The API rejects that — after a tool call
+the reply has to come back in a specific format (a `tool_result` block). So the
+retry was broken on exactly the messages that needed it, which is the worst
+place for a bug to hide. Reading the code wouldn't have caught it.
 
 ## c. Where the model was wrong
 

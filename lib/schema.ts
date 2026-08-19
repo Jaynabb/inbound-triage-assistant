@@ -99,8 +99,19 @@ export const TriageResultSchema = z.object({
     .describe("0-1. How certain the category is. Low confidence on a real message means route to a human."),
   reasoning: z
     .string()
-    .max(300)
-    .describe("Brief justification for the category and priority. Shown in the UI for auditability."),
+    .describe(
+      "Justification for the category and priority. Shown in the UI for auditability.",
+    ),
+  // Deliberately NOT length-capped. This is the audit trail — it's what a
+  // person reads to check whether a triage was sound, and the qualifier tends
+  // to live at the end ("...but he may be an existing client, worth checking").
+  // Truncating it makes the record misleading, which is worse than not having
+  // one. The UI already collapses it behind a toggle, so length costs nothing
+  // on screen, and max_tokens bounds it against a runaway response.
+  //
+  // An earlier version capped this at 300 chars. The model consistently wanted
+  // 320-370, so the cap fought it on 3 of 11 messages for no benefit. The cap
+  // was mine and the UI never needed it.
 });
 
 export type TriageResult = z.infer<typeof TriageResultSchema>;
