@@ -16,3 +16,6 @@ outputs/*.raw.json
 
 # Working notes — folded into RATIONALE.md, not a deliverable
 NOTES.md
+
+# build artifact
+tsconfig.tsbuildinfo
