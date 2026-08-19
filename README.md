@@ -42,6 +42,15 @@ and a local file means the whole thing runs with `npm run dev` and no external
 setup. Airtable would have cost hours and bought nothing for a 13-message queue.
 Sketch of how I'd model it in Airtable is below.
 
+**Results aren't persisted, and that's deliberate.** The messages are read from
+the file; the triage results are held in memory for as long as the tab is open.
+Refresh and they're gone, and running it again costs another set of API calls.
+Nothing in the brief asked for storage, and it calls a single-user local tool
+"exactly right" — this is a screen you look at to decide what to handle first,
+not a system of record. In production the results land in the Messages table
+described below. Worth flagging the gap rather than leaving it to be found: the
+Airtable sketch stores triage output, the running app does not.
+
 **Haiku 4.5, `temperature: 0`.** Classification against a tight schema is what a
 small fast model is for. Temperature 0 because this is classification, not
 writing — re-running the queue shouldn't shuffle the categories. Configurable
