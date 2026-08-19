@@ -363,7 +363,32 @@ section + section { margin-top: 42px; }
 
 /* why / reasoning */
 
-.why { margin-left: auto; flex: 0 0 auto; }
+.toggles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 16px;
+  margin-top: 7px;
+}
+
+.why { flex: 0 0 auto; }
+
+/* Once opened, take the whole row so the panel isn't squeezed between the
+   other toggles. flex-wrap drops it onto its own line. */
+.why[open] { width: 100%; }
+
+.why-inert { margin-top: 6px; }
+
+.raw-body {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 10px 0 0;
+  max-height: 240px;
+  overflow: auto;
+}
 
 .why summary {
   font-family: var(--mono);

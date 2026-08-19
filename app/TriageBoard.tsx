@@ -193,6 +193,14 @@ function Row({ item, triaged }: { item: InboundItem; triaged: TriagedItem }) {
           <div className="action">
             <span className="action-arrow">→</span>
             <span className="action-text">{r.next_action}</span>
+          </div>
+          {/* Own row, so an opened panel can take the full width instead of
+              being squeezed inside the action line's flex row. */}
+          <div className="toggles">
+            <details className="why">
+              <summary>message</summary>
+              <pre className="why-body raw-body">{item.body}</pre>
+            </details>
             <details className="why">
               <summary>why</summary>
               <p className="why-body">{r.reasoning}</p>
@@ -200,7 +208,15 @@ function Row({ item, triaged }: { item: InboundItem; triaged: TriagedItem }) {
           </div>
         </>
       ) : (
-        <p className="note">{triaged.note}</p>
+        <>
+          <p className="note">{triaged.note}</p>
+          {/* Readable on the unreadable ones too — being able to see WHAT was
+              rejected is the point of not dropping them silently. */}
+          <details className="why why-inert">
+            <summary>message</summary>
+            <pre className="why-body raw-body">{item.body}</pre>
+          </details>
+        </>
       )}
     </article>
   );
