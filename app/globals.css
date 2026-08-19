@@ -55,9 +55,13 @@
     --rule: #222a35;
     --rule-strong: #333d4a;
 
-    --brass: #cda75a;
-    --brass-ink: #e0bd77;
-    --brass-wash: #241d10;
+    /* Brass has to be quieter here than in light mode. On a near-black page a
+       saturated gold outshines the light-on-dark urgent rows, which inverts
+       the hierarchy — value starts shouting over urgency. Muted text, dim
+       border, no fill. */
+    --brass: #6b5829;
+    --brass-ink: #a98c4d;
+    --brass-wash: transparent;
 
     --negative-bg: #e9edf2;
     --negative-ink: #0b0f15;
