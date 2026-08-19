@@ -152,10 +152,23 @@ main {
   color: var(--ink-3);
 }
 
-.tally.is-urgent .tally-n { color: var(--ink); }
-.tally.is-quiet .tally-n { color: var(--ink-3); }
+/* Everything that isn't urgent, in one quiet line. */
+.rest {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
 
 .spacer { flex: 1 1 auto; }
+
+.standin {
+  font-size: 14px;
+  color: var(--ink-3);
+  max-width: 44ch;
+  margin: 0;
+}
 
 /* ---------- controls ---------------------------------------- */
 
@@ -252,17 +265,19 @@ section + section { margin-top: 42px; }
   color: var(--ink-3);
 }
 
-.row.is-pending { background: var(--sheet-sunk); border-left-color: var(--rule); }
 
-/* head line: id · sender · org · subject */
+/* head line: who it's from (left) · what it is (right) */
 
 .row-head {
   display: flex;
   align-items: baseline;
   gap: 9px;
   flex-wrap: wrap;
-  margin-bottom: 7px;
+  margin-bottom: 5px;
 }
+
+.who { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; min-width: 0; }
+.what { display: flex; align-items: baseline; gap: 9px; margin-left: auto; }
 
 .rid {
   font-family: var(--mono);
@@ -291,8 +306,11 @@ section + section { margin-top: 42px; }
   display: flex;
   gap: 8px;
   align-items: baseline;
+  margin: 0;
 }
 .row.p-high .action { color: var(--negative-ink-2); }
+
+.action-text { flex: 1 1 auto; min-width: 0; }
 
 .action-arrow {
   font-family: var(--mono);
@@ -300,19 +318,6 @@ section + section { margin-top: 42px; }
   flex: 0 0 auto;
 }
 .row.p-high .action-arrow { color: var(--negative-brass); }
-
-/* meta strip */
-
-.meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 11px;
-  padding-top: 10px;
-  border-top: 1px solid var(--rule);
-}
-.row.p-high .meta { border-top-color: var(--negative-rule); }
 
 .tag {
   font-family: var(--mono);
@@ -354,7 +359,7 @@ section + section { margin-top: 42px; }
 
 /* why / reasoning */
 
-.why { margin-left: auto; }
+.why { margin-left: auto; flex: 0 0 auto; }
 
 .why summary {
   font-family: var(--mono);
@@ -390,11 +395,6 @@ section + section { margin-top: 42px; }
   line-height: 1.45;
 }
 
-.raw {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--ink-3);
-}
 
 .fatal {
   font-family: var(--mono);
