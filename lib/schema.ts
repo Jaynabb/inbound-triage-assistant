@@ -45,26 +45,28 @@ export const CATEGORY_DEFINITIONS: Record<Category, string> = {
 };
 
 /**
- * Priority = TIME PRESSURE ONLY.
+ * Priority answers one question: WHAT BREAKS IF THIS WAITS?
  *
- * The deliberate choice here is that priority answers exactly one question:
- * what does a human need to touch first today. Business value is a separate
- * field (`value_signal`) so a large opportunity is surfaced rather than
- * smuggled into an urgency number.
+ * Not how big the opportunity is, and not how badly the sender wants a reply.
+ * Just: if nobody touches this today, does something go wrong?
  *
- * Concretely: inb-001 is an $8M liquidity event with no deadline. It is
- * `priority: medium` and `value_signal: high`. A blended score would have
- * called it "high" and made "high" mean two different things.
+ * The question deliberately says nothing about money, which is why business
+ * value is a separate field. `inb-001` is an $8M liquidity event with no
+ * deadline — nothing breaks if he waits until Thursday, so it's `medium`
+ * priority and `high` value_signal. Both true, no tension.
+ *
+ * It also settles the case people get wrong in the other direction: a vendor
+ * would love a fast reply, but nothing breaks if he never gets one. Low.
  */
 export const PRIORITIES = ["high", "medium", "low"] as const;
 export type Priority = (typeof PRIORITIES)[number];
 
 export const PRIORITY_DEFINITIONS: Record<Priority, string> = {
-  high: "A stated deadline inside ~72h, an escalation/complaint, or an at-risk client relationship.",
+  high: "Something breaks if this waits — a deadline passes, a complaint escalates, or a client relationship degrades.",
   medium:
-    "Someone with a legitimate claim on the firm's time wants a real response, but named no deadline. Normal business pace.",
+    "Nothing breaks today, but someone is waiting on us for a real answer.",
   low:
-    "No time pressure, nothing to action, or unsolicited inbound sales/recruiting/outreach. A sender wanting a reply does not by itself create urgency for the firm — a vendor cold pitch is low no matter how keen the vendor is.",
+    "Nothing breaks and nobody is waiting on us. Includes unsolicited sales, recruiting and outreach — the sender wanting a reply is not the firm having something at stake.",
 };
 
 /** Business value, kept separate from urgency on purpose. */

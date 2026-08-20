@@ -396,18 +396,29 @@ section + section { margin-top: 42px; }
 
 /* VALUE IN BRASS — appears only when there is money on the table. */
 
+/* Base state is quiet — every row shows a value so the field never looks like
+   it appears at random. */
 .worth {
   font-family: var(--mono);
   font-size: 10.5px;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--brass-ink);
-  background: var(--brass-wash);
-  border: 1px solid var(--brass);
+  color: var(--ink-3);
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: 2px;
   padding: 2px 7px;
+  white-space: nowrap;
 }
-.row.p-high .worth {
+.row.p-high .worth { color: var(--negative-ink-2); }
+
+/* Brass stays reserved for money actually on the table. */
+.worth.is-notable {
+  color: var(--brass-ink);
+  background: var(--brass-wash);
+  border-color: var(--brass);
+}
+.row.p-high .worth.is-notable {
   color: var(--negative-brass);
   background: transparent;
   border-color: var(--negative-brass);

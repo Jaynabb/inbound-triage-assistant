@@ -1,7 +1,7 @@
 {
   "description": "Hand-built expected triage for the 13 sample messages. Written by the engineer BEFORE looking at model output, so it grades the model rather than describing it. This is the spec; the model is the implementation under test.",
   "rules_applied": {
-    "priority": "Time pressure ONLY. high = deadline within ~72h, escalation/complaint, or at-risk relationship. medium = legitimate claim on the firm's time, no deadline named. low = no time pressure, nothing to action, or unsolicited inbound sales/recruiting/outreach.",
+    "priority": "One question: what breaks if this waits? high = something breaks today (a deadline passes, a complaint escalates, a relationship degrades). medium = nothing breaks, but someone is waiting on us. low = nothing breaks and nobody is waiting, including all unsolicited sales/recruiting/outreach.",
     "value_signal": "Business value, judged separately from urgency, so a large opportunity is surfaced rather than smuggled into priority."
   },
   "expected": {
@@ -33,7 +33,7 @@
     "inb-006": {
       "category": "prospect",
       "priority": "low",
-      "why": "Genuine prospect, but she states 'no rush at all' herself. Self-declared absence of time pressure."
+      "why": "Genuine prospect, but she states 'no rush at all' herself. Nothing breaks if this waits, and by her own account nobody is waiting on us."
     },
     "inb-007": {
       "category": "partner",

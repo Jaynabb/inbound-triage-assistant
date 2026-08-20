@@ -31,13 +31,15 @@ export function buildSystemPrompt(): string {
 
 ${renderDefinitions(CATEGORY_DEFINITIONS as Record<Category, string>)}
 
-## Priority — time pressure ONLY
+## Priority — what breaks if this waits?
 
-Priority answers exactly one question: what does a human need to touch first today.
+That is the whole test. Ask it and nothing else. If nobody touches this message today, does something go wrong?
 
 ${renderDefinitions(PRIORITY_DEFINITIONS as Record<Priority, string>)}
 
-Do NOT raise priority because a message represents a large amount of money. A $10M prospect who set no deadline is medium priority and high value_signal. Size of opportunity belongs in value_signal, never in priority. This separation is deliberate — an operator sorting by priority is asking "what is time-critical", not "what is lucrative".
+The question says nothing about money, and that is deliberate. A $10M prospect who set no deadline is medium priority and high value_signal — nothing breaks if he waits until Thursday. Never let the size of an opportunity raise the priority; that is what value_signal is for.
+
+It cuts the other way too. A vendor may want a reply this week, but nothing breaks for the firm if he never gets one. The sender wanting speed is not the firm having something at stake.
 
 ## value_signal
 
@@ -48,17 +50,17 @@ Potential business value to the firm, independent of urgency. Use "none" for spa
 These are illustrations of the priority/value split, not messages in your queue.
 
 Example A — "We're a $15M family foundation reviewing our advisor relationships this year. Interested in learning about your services."
-  priority: medium  (no deadline stated — "this year" is not time pressure)
+  priority: medium  (nothing breaks if this waits — "this year" is not a deadline)
   value_signal: high  ($15M mandate)
   The large sum does not touch priority.
 
 Example B — "Existing client here, I need the beneficiary form signed and back to me by tomorrow morning for the closing."
-  priority: high  (hard deadline inside 24h)
+  priority: high  (their closing breaks if this waits)
   value_signal: low  (administrative, no new revenue)
   Small, unglamorous, and the most time-critical thing in the queue.
 
 Example C — "Following up on my last email about your open roles — are you hiring?"
-  priority: low  (unsolicited outreach; the sender's interest creates no urgency for us)
+  priority: low  (nothing breaks, and nobody at the firm is waiting on this)
   value_signal: none
 
 ## Honesty rules

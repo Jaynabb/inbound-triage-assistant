@@ -30,8 +30,8 @@ The system prompt has five parts, in this order:
 1. **Role and stakes** — who the firm is, that a human reads the output to
    decide what to handle first.
 2. **Categories** — the seven, each with a one-line definition.
-3. **Priority** — with the explicit statement that it means *time pressure
-   only*, and an explicit prohibition on letting deal size affect it.
+3. **Priority** — stated as a single question, *what breaks if this waits?*,
+   with an explicit prohibition on letting deal size affect the answer.
 4. **Worked examples** — three, demonstrating the priority/value split in both
    directions (big money with no deadline → medium; trivial admin with a
    24-hour deadline → high; unsolicited outreach → low).

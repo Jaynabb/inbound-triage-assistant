@@ -16,16 +16,28 @@ I added `unclear` because of Sam Cho (`inb-009`). That email could easily be a
 real follow up about something he already talked to the firm about. Rather than
 guess, I'd rather send it to a human and let them connect the dots.
 
-Priority is based on how fast the firm needs to respond to keep a relationship
-smooth and keep customers happy. Not how fast someone wants a response from the
-firm. Those two are different more often than you'd think. The vendor in
-`inb-003` would love a fast reply and gets low, because nothing happens to the
-firm if he waits. Bob Ellison in `inb-005` is angry about a fee and wants a call
-today, and that relationship gets worse by the hour, so he's high.
+Priority comes down to one question: **what breaks if this waits?**
 
-Business value is a separate field. That's why `inb-001` — $8M, no deadline —
-is medium priority and high value. If they were one number, "high" would mean
-two different things and you couldn't answer why something is medium.
+- Something breaks today — high
+- Nothing breaks, but someone's waiting on us — medium
+- Nothing breaks and nobody's waiting — low
+
+That's the whole rule. Dana in `inb-002` is high because her mortgage lender
+needs the statement by Friday and she misses her deadline if we sit on it. Bob
+in `inb-005` is high because he's already angry and gets angrier by the hour.
+Marcus in `inb-003` would love a reply next week, but nothing breaks for the
+firm if he never gets one, so he's low.
+
+I started with a three-part definition — deadline inside 72 hours, or an
+escalation, or an at-risk relationship — and it gave the right answers but was
+awkward to explain. "What breaks if this waits" produces the identical result on
+all 11 messages and is one sentence instead of three clauses.
+
+Notice the question says nothing about money. That's why business value is a
+separate field. `inb-001` is $8M with no deadline: nothing breaks if Gregory
+waits until Thursday, so he's medium priority and high value. Both true, and no
+tension between them. If the two were one number, "high" would mean two
+different things and there'd be no answer to "why is this medium".
 
 On adding more categories: everything is defined in one spot in the TypeScript
 (`lib/schema.ts`). If you want to add a category, say `press` because someone

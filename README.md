@@ -59,8 +59,11 @@ via `TRIAGE_MODEL`.
 **Seven categories, not the four suggested.** `partner`, `recruiter` and
 `unclear` were added because three messages didn't fit. See RATIONALE (a).
 
-**Priority means time pressure only.** Business value is a separate field, so a
-big opportunity gets surfaced instead of being hidden inside an urgency score.
+**Priority is one question: what breaks if this waits?** Something breaks today
+is high, nothing breaks but someone's waiting is medium, nothing breaks and
+nobody's waiting is low. The question says nothing about money, which is why
+business value is a separate field — a big opportunity gets surfaced instead of
+being hidden inside an urgency score.
 
 **Two junk messages are filtered before the API call**, and the filter reads the
 message body only — never the subject or sender. `inb-005` has no subject and is
