@@ -374,12 +374,16 @@ section + section { margin-top: 42px; }
 
 .action-text { flex: 1 1 auto; min-width: 0; }
 
-.action-arrow {
+.action-label {
   font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
   color: var(--ink-3);
   flex: 0 0 auto;
+  padding-top: 2px;
 }
-.row.p-high .action-arrow { color: var(--negative-brass); }
+.row.p-high .action-label { color: var(--negative-brass); }
 
 .tag {
   font-family: var(--mono);

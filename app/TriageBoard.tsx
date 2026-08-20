@@ -250,8 +250,11 @@ function Row({ item, triaged }: { item: InboundItem; triaged: TriagedItem }) {
       {r ? (
         <>
           <p className="summary">{r.summary}</p>
+          {/* Labelled explicitly. It was just an arrow, and an unlabelled
+              field is one a reader has to infer — including a reader checking
+              it against the brief. */}
           <div className="action">
-            <span className="action-arrow">→</span>
+            <span className="action-label">Next</span>
             <span className="action-text">{r.next_action}</span>
           </div>
           {/* Own row, so an opened panel can take the full width instead of
