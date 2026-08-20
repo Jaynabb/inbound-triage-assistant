@@ -2,13 +2,13 @@
   "description": "Hand-built expected triage for the 13 sample messages. Written by the engineer BEFORE looking at model output, so it grades the model rather than describing it. This is the spec; the model is the implementation under test.",
   "rules_applied": {
     "priority": "One question: what breaks if this waits? high = something breaks today (a deadline passes, a complaint escalates, a relationship degrades). medium = nothing breaks, but someone is waiting on us. low = nothing breaks and nobody is waiting, including all unsolicited sales/recruiting/outreach.",
-    "value_signal": "Business value, judged separately from urgency, so a large opportunity is surfaced rather than smuggled into priority."
+    "note": "Priority is the only judged axis. The size of an opportunity belongs in the summary, not in how fast it gets handled."
   },
   "expected": {
     "inb-001": {
       "category": "prospect",
       "priority": "medium",
-      "why": "$8M liquidity event is high value, but he named no deadline and asked only 'who should I speak with'. Value belongs in value_signal."
+      "why": "$8M is the biggest opportunity in the queue, but he named no deadline and asked only 'who should I speak with'. Nothing breaks if he waits until Thursday."
     },
     "inb-002": {
       "category": "existing_client",

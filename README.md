@@ -1,7 +1,7 @@
 # Inbound Triage Assistant
 
 Triages a shared-inbox queue with an LLM. Each message gets a one-line summary,
-a category, a priority, a business-value signal, and a suggested next action.
+a category, a priority, and a suggested next action.
 Built for the Arootah AI Product Engineer take-home.
 
 The reasoning behind the design decisions is in **[RATIONALE.md](RATIONALE.md)**
@@ -61,9 +61,15 @@ via `TRIAGE_MODEL`.
 
 **Priority is one question: what breaks if this waits?** Something breaks today
 is high, nothing breaks but someone's waiting is medium, nothing breaks and
-nobody's waiting is low. The question says nothing about money, which is why
-business value is a separate field — a big opportunity gets surfaced instead of
-being hidden inside an urgency score.
+nobody's waiting is low. The question says nothing about money on purpose — an
+$8M prospect with no deadline is medium, because nothing breaks if he waits. The
+amount goes in the summary where a reader can see it; it just doesn't move him
+up the queue.
+
+**I built a separate value field and removed it.** The brief asks for four
+things and value was a fifth I'd added. Once priority was one question, the
+second axis was answering something nobody asked, and "high priority, low value"
+read as contradictory even though both halves were true.
 
 **Two junk messages are filtered before the API call**, and the filter reads the
 message body only — never the subject or sender. `inb-005` has no subject and is
@@ -82,7 +88,7 @@ Clients                    Messages
 name                       from_email
 email          ◄────────── Client         (linked)
 owning_advisor             received_at
-                           category / priority / value_signal
+                           category / priority
                            summary / next_action
                            status
 ```

@@ -94,8 +94,8 @@ for (const r of results) {
   if (r.result.priority === exp.priority) priRight++;
   else
     disagreements.push(
-      `${r.id}  priority: expected ${exp.priority}, got ${r.result.priority}  ` +
-        `(value_signal=${r.result.value_signal})\n            key: ${exp.why}`,
+      `${r.id}  priority: expected ${exp.priority}, got ${r.result.priority}\n` +
+        `            key: ${exp.why}`,
     );
 }
 

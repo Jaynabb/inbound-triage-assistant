@@ -1,16 +1,14 @@
 /* ============================================================
    Inbound triage — visual system
 
-   Two axes, two visual languages, deliberately kept apart:
+   One axis, rendered in INK. Priority answers a single question
+   — what breaks if this waits — so the page has one hierarchy
+   and nothing competing with it. High-priority rows print in
+   the negative. Achromatic on purpose: the "what's on fire"
+   scan doesn't depend on colour vision.
 
-     URGENCY is rendered in INK.   High-priority rows print in the
-                                    negative. Achromatic, so the
-                                    "what's on fire" scan works
-                                    without relying on colour.
-
-     VALUE   is rendered in BRASS.  A warm mark that appears only
-                                    when there's real money on the
-                                    table. Absence is the default.
+   Brass survives as the interaction accent only (focus rings,
+   active filter). It no longer encodes data.
 
    Type: serif masthead / mono record data / sans prose — the
    register of a statement or tear sheet, not a dashboard.
@@ -55,10 +53,8 @@
     --rule: #222a35;
     --rule-strong: #333d4a;
 
-    /* Brass has to be quieter here than in light mode. On a near-black page a
-       saturated gold outshines the light-on-dark urgent rows, which inverts
-       the hierarchy — value starts shouting over urgency. Muted text, dim
-       border, no fill. */
+    /* Muted here — on a near-black page a saturated gold outshines the
+       light-on-dark urgent rows and pulls the eye away from them. */
     --brass: #6b5829;
     --brass-ink: #a98c4d;
     --brass-wash: transparent;
@@ -396,33 +392,7 @@ section + section { margin-top: 42px; }
 
 /* VALUE IN BRASS — appears only when there is money on the table. */
 
-/* Base state is quiet — every row shows a value so the field never looks like
-   it appears at random. */
-.worth {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 2px;
-  padding: 2px 7px;
-  white-space: nowrap;
-}
-.row.p-high .worth { color: var(--negative-ink-2); }
 
-/* Brass stays reserved for money actually on the table. */
-.worth.is-notable {
-  color: var(--brass-ink);
-  background: var(--brass-wash);
-  border-color: var(--brass);
-}
-.row.p-high .worth.is-notable {
-  color: var(--negative-brass);
-  background: transparent;
-  border-color: var(--negative-brass);
-}
 
 .flag {
   font-family: var(--mono);

@@ -237,23 +237,11 @@ function Row({ item, triaged }: { item: InboundItem; triaged: TriagedItem }) {
           {!item.subject && <span className="subject is-absent">no subject</span>}
         </span>
 
-        {/* What it is, right-aligned. Identity belongs beside the sender, not
-            in a footer. Brass appears only when there's money on the table. */}
+        {/* What it is, right-aligned. Identity belongs beside the sender
+            rather than in a footer. */}
         {r && (
           <span className="what">
             {triaged.status === "review" && <span className="flag">needs a human</span>}
-            {/* Shown on every row, not just the notable ones — a field that
-                appears sometimes reads as arbitrary. Brass is reserved for
-                high and medium, so "there's money here" still carries. */}
-            <span
-              className={`worth${
-                r.value_signal === "high" || r.value_signal === "medium"
-                  ? " is-notable"
-                  : ""
-              }`}
-            >
-              {r.value_signal === "none" ? "no value" : `${r.value_signal} value`}
-            </span>
             <span className="tag">{r.category.replace("_", " ")}</span>
           </span>
         )}

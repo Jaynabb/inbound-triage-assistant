@@ -33,11 +33,18 @@ escalation, or an at-risk relationship — and it gave the right answers but was
 awkward to explain. "What breaks if this waits" produces the identical result on
 all 11 messages and is one sentence instead of three clauses.
 
-Notice the question says nothing about money. That's why business value is a
-separate field. `inb-001` is $8M with no deadline: nothing breaks if Gregory
-waits until Thursday, so he's medium priority and high value. Both true, and no
-tension between them. If the two were one number, "high" would mean two
-different things and there'd be no answer to "why is this medium".
+Notice the question says nothing about money, and that's the point. `inb-001` is
+$8M with no deadline — nothing breaks if Gregory waits until Thursday, so he's
+medium. The money is real and it's right there in his summary, it just has no
+bearing on what gets handled first.
+
+I did try carrying a separate `value_signal` field alongside priority, and I
+took it out. It worked, but the brief asks for four things — a summary, a
+category, a priority, a next action — and value was a fifth I'd added. Once
+priority was stated as one question, the second field was answering a question
+nobody asked, and rows reading "high priority, low value" looked contradictory
+at a glance even though both halves were true. One axis, one rule, nothing to
+reconcile.
 
 On adding more categories: everything is defined in one spot in the TypeScript
 (`lib/schema.ts`). If you want to add a category, say `press` because someone

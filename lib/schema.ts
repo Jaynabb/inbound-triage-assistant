@@ -50,12 +50,12 @@ export const CATEGORY_DEFINITIONS: Record<Category, string> = {
  * Not how big the opportunity is, and not how badly the sender wants a reply.
  * Just: if nobody touches this today, does something go wrong?
  *
- * The question deliberately says nothing about money, which is why business
- * value is a separate field. `inb-001` is an $8M liquidity event with no
- * deadline — nothing breaks if he waits until Thursday, so it's `medium`
- * priority and `high` value_signal. Both true, no tension.
+ * The question deliberately says nothing about money. `inb-001` is an $8M
+ * liquidity event with no deadline — nothing breaks if he waits until
+ * Thursday, so it's `medium`. The size of the opportunity is real and it's
+ * already in the summary; it just has no bearing on what gets handled first.
  *
- * It also settles the case people get wrong in the other direction: a vendor
+ * It settles the case people get wrong in the other direction too: a vendor
  * would love a fast reply, but nothing breaks if he never gets one. Low.
  */
 export const PRIORITIES = ["high", "medium", "low"] as const;
@@ -68,10 +68,6 @@ export const PRIORITY_DEFINITIONS: Record<Priority, string> = {
   low:
     "Nothing breaks and nobody is waiting on us. Includes unsolicited sales, recruiting and outreach — the sender wanting a reply is not the firm having something at stake.",
 };
-
-/** Business value, kept separate from urgency on purpose. */
-export const VALUE_SIGNALS = ["high", "medium", "low", "none"] as const;
-export type ValueSignal = (typeof VALUE_SIGNALS)[number];
 
 /**
  * The contract the model must satisfy. This is the single source of truth:
@@ -86,9 +82,6 @@ export const TriageResultSchema = z.object({
     .describe("One line, under 200 chars, describing what this message wants."),
   category: z.enum(CATEGORIES),
   priority: z.enum(PRIORITIES),
-  value_signal: z
-    .enum(VALUE_SIGNALS)
-    .describe("Potential business value, independent of urgency. 'none' for spam/noise."),
   next_action: z
     .string()
     .min(1)

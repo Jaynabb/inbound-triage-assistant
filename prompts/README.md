@@ -32,9 +32,9 @@ The system prompt has five parts, in this order:
 2. **Categories** — the seven, each with a one-line definition.
 3. **Priority** — stated as a single question, *what breaks if this waits?*,
    with an explicit prohibition on letting deal size affect the answer.
-4. **Worked examples** — three, demonstrating the priority/value split in both
-   directions (big money with no deadline → medium; trivial admin with a
-   24-hour deadline → high; unsolicited outreach → low).
+4. **Worked examples** — three, showing the rule in both directions (big money
+   with no deadline → medium; trivial admin with a 24-hour deadline → high;
+   unsolicited outreach → low).
 5. **Honesty rules** — when to use `unclear`, that `(individual)` and
    `(unknown)` are placeholders rather than company names, and that a missing
    subject or sender means nothing on its own.
@@ -68,7 +68,7 @@ Three layers, each catching what the others cannot:
    limit. Only zod caught that.
 
 3. **Tiered repair.** Not every defect deserves the same response:
-   - `category` / `priority` / `value_signal` **drive routing** — a wrong value
+   - `category` / `priority` **drive routing** — a wrong value
      misroutes a client, so these hard-fail and trigger one corrective retry
      with the specific validation error fed back.
    - `summary` / `reasoning` are **display only** — these are truncated rather

@@ -34,7 +34,7 @@ const elapsed = Date.now() - started;
 const pad = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + "…" : s.padEnd(n));
 
 console.log(
-  pad("id", 9) + pad("status", 19) + pad("category", 17) + pad("pri", 7) + pad("val", 6) + "summary",
+  pad("id", 9) + pad("status", 19) + pad("category", 17) + pad("pri", 8) + "summary",
 );
 console.log("-".repeat(118));
 
@@ -44,8 +44,7 @@ for (const r of results) {
     pad(r.id, 9) +
       pad(r.status, 19) +
       pad(c?.category ?? "—", 17) +
-      pad(c?.priority ?? "—", 7) +
-      pad(c?.value_signal ?? "—", 6) +
+      pad(c?.priority ?? "—", 8) +
       (c?.summary ?? r.note ?? ""),
   );
 }
