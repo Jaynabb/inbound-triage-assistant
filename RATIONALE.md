@@ -143,12 +143,22 @@ quoting one number.
 
 ## d. Edge cases
 
-Two of the 13 messages never get sent to the model. `inb-010` is empty except
-for a single period. `inb-011` is a broken email — the text is scrambled and
-there's nothing readable in it.
+The filter is one rule: **if a message is broken or blank, park it. Otherwise
+triage it.**
 
-I stop those before the API call because sending them would cost money for no
-reason. With 13 messages that's nothing. At 10,000 a day it adds up.
+- **Broken** means it has characters a person can't type — control codes, or
+  the `�` you get when text is decoded wrong. It arrived damaged. That's
+  `inb-011`.
+- **Blank** means it has no letters or numbers in it at all. That's `inb-010`,
+  which is a single period.
+
+They're two different failures, so one test can't catch both. `inb-011` is full
+of letters and still garbage, so a letters check misses it. `inb-010` is a
+period, and a period is a perfectly valid character, so a corruption check
+misses it.
+
+I stop those two before the API call because sending them would cost money for
+no reason. With 13 messages that's nothing. At 10,000 a day it adds up.
 
 The important part is what the filter is allowed to look at. `inb-005` is also
 missing things — no subject, no company — but it's the most urgent message in
@@ -160,9 +170,19 @@ would end up throwing away the angriest customers.
 That's why the filter only looks at the body. Not the subject, not the sender.
 A missing subject tells you nothing. An empty body tells you everything.
 
-The gap is wide, so the cutoff isn't a guess. The two junk messages have 0
-readable characters. The quietest real message has 67.
-`scripts/verify-signal.mts` checks this.
+There's no minimum length, and that was a bug I caught late. I originally had
+"blank" mean fewer than 15 characters, which sounds reasonable until you notice
+that a client replying **"ok"** is two characters. That message would have been
+parked and nobody would ever have known — which is the worst thing this system
+can do.
+
+So blank means no letters or numbers at all. There's no number to tune and no
+threshold to defend. `scripts/verify-signal.mts` asserts it both ways: `"ok"`,
+`"a"` and `"call me"` get through; `"."`, `"..."` and `"?!"` are parked.
+
+One limitation worth naming: an emoji-only reply — a client sending just 👍 —
+counts as blank and gets parked. It's still visible in the couldn't-read
+branch rather than deleted, and there's nothing in it to triage anyway.
 
 The skipped messages still show up on screen with the reason. Nothing
 disappears.

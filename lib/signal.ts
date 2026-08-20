@@ -1,23 +1,27 @@
 /**
  * The pre-flight check — runs BEFORE any model call.
  *
- * Two questions, in this order:
+ * One rule:
  *
- *   1. Is the message corrupted?  Does it contain characters a person cannot
- *                                 type — null bytes, control codes, or the "�"
- *                                 left behind when text is decoded with the
- *                                 wrong encoding? Then it arrived broken.
+ *     IF the message is BROKEN or BLANK, park it. Otherwise, triage it.
  *
- *   2. Is there anything in it?   Count the letters and numbers. If there are
- *                                 barely any, there is nothing to read.
+ *     broken — it contains characters a person can't type: control codes, or
+ *              the "�" left behind when text is decoded with the wrong
+ *              encoding. The message arrived damaged.
  *
- * That is the whole filter. Anything passing both goes to the model.
+ *     blank  — it contains no letters or numbers at all. There is nothing in
+ *              it to read.
+ *
+ * Those are two different failures — one arrived damaged, one arrived empty —
+ * so no single test catches both. A letters-only check misses inb-011, which is
+ * full of letters and still garbage. A corruption-only check misses inb-010,
+ * which is a period, and a period is a perfectly valid character.
  *
  * An earlier version also stripped MIME headers, multipart boundaries, RFC 2047
- * encoded-words and forwarded-message markers before counting. All of it turned
- * out to be redundant — the corrupted check already catches every message those
- * patterns were there for — and it made the filter hard to explain. A rule you
- * can't state plainly is a rule you can't defend.
+ * encoded-words and forwarded-message markers before deciding. All of it was
+ * redundant — the broken check already catches every message those patterns
+ * existed for — and it made the filter impossible to state in a sentence. A
+ * rule you can't say out loud is a rule you can't defend.
  *
  * THE RULE THAT MATTERS: this only ever looks at the BODY. Never the subject,
  * never the sender. inb-005 has no subject and is the most urgent message in
@@ -25,34 +29,44 @@
  * today. A filter keyed on missing fields would drop him and keep the
  * newsletter. Missing metadata is normal. An empty body is not.
  *
- * Measured against the sample: the two junk messages fail (one corrupted, one
- * with zero readable characters). The eleven real ones carry 67–147 letters and
- * digits and none are corrupted. Nothing sits near the line.
+ * Against the sample: inb-011 is broken, inb-010 is blank, and all eleven real
+ * messages pass.
+ *
+ * Known limitation: an emoji-only reply — a client sending just 👍 — counts as
+ * blank and gets parked. It lands in the "couldn't read" branch rather than
+ * being deleted, so it's recoverable, and there's nothing in it to triage.
+ * Named rather than engineered around.
  */
 
 /**
- * Characters that never appear in text a human typed: C0 control codes (minus
- * tab, newline and carriage return, which are real formatting), DEL, and the
- * Unicode replacement character.
+ * BROKEN: characters that never appear in text a human typed. C0 control codes
+ * (minus tab, newline and carriage return, which are real formatting), DEL, and
+ * the Unicode replacement character.
  */
-const CORRUPTED = new RegExp(
+const BROKEN = new RegExp(
   "[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F\\uFFFD]",
 );
 
 /**
- * Minimum letters and digits to be worth a model call.
+ * BLANK is deliberately "no letters or numbers at all" — not "shorter than N".
  *
- * Not a tuned number. The junk in the sample has 0; the quietest real message
- * has 67. Anything in that gap behaves identically, so this sits well clear of
- * both rather than being fitted to the data.
+ * An earlier version required 15 characters. It looked reasonable and it was
+ * wrong: a client replying "ok" is two characters. Any minimum parks it, and a
+ * real client's message silently never reaching a person is the worst failure
+ * this system can have.
+ *
+ * So there is no threshold. "ok" has two letters and goes through. "a" has one
+ * and goes through, where the model can return needs_human if it can't tell
+ * what's wanted. Better to spend one API call on an ambiguous message than to
+ * drop a real one. Nothing left to tune, and nothing to justify.
  */
-export const MIN_REAL_CHARS = 15;
+const HAS_CONTENT = /[\p{L}\p{N}]/u;
 
 export interface SignalCheck {
   hasSignal: boolean;
   /** The body with whitespace normalised. This is what goes to the model. */
   cleaned: string;
-  /** How many letters and digits the body contains. */
+  /** How many letters and digits the body contains. Reported, never compared. */
   realChars: number;
   /** Plain-language reason when hasSignal is false. Rendered in the UI. */
   reason: string | null;
@@ -64,34 +78,28 @@ export function checkSignal(rawBody: unknown): SignalCheck {
       hasSignal: false,
       cleaned: "",
       realChars: 0,
-      reason: "the message has no body",
+      reason: "blank — the message has no body",
     };
   }
 
   const realChars = (rawBody.match(/[\p{L}\p{N}]/gu) ?? []).length;
   const cleaned = rawBody.replace(/\s+/g, " ").trim();
 
-  // 1. Is it corrupted?
-  if (CORRUPTED.test(rawBody)) {
+  if (BROKEN.test(rawBody)) {
     return {
       hasSignal: false,
       cleaned,
       realChars,
-      reason:
-        "the message is corrupted — it contains characters that aren't readable text",
+      reason: "broken — the message contains characters that aren't readable text",
     };
   }
 
-  // 2. Is there anything in it?
-  if (realChars < MIN_REAL_CHARS) {
+  if (!HAS_CONTENT.test(rawBody)) {
     return {
       hasSignal: false,
       cleaned,
       realChars,
-      reason:
-        realChars === 0
-          ? "there's nothing to read — the message contains no letters or numbers"
-          : `there's almost nothing to read — only ${realChars} letters or numbers in the whole message`,
+      reason: "blank — the message contains no letters or numbers",
     };
   }
 

@@ -8,7 +8,7 @@
  * Run:  node scripts/verify-signal.mts
  */
 import { readFileSync } from "node:fs";
-import { checkSignal, MIN_REAL_CHARS } from "../lib/signal.ts";
+import { checkSignal } from "../lib/signal.ts";
 
 interface Inbound {
   id: string;
@@ -27,7 +27,6 @@ const EXPECT_SKIPPED = new Set(["inb-010", "inb-011"]);
 /** Items that would be wrongly dropped by a naive "missing fields" filter. */
 const MUST_SURVIVE = ["inb-005", "inb-008", "inb-009"];
 
-console.log(`MIN_REAL_CHARS = ${MIN_REAL_CHARS}\n`);
 console.log("id        chars  decision  why");
 console.log("-".repeat(72));
 
@@ -70,39 +69,47 @@ for (const id of MUST_SURVIVE) {
 // Which rule caught each skipped message. The two rules are independent, so
 // reporting them together would be misleading — a corrupted message can have
 // plenty of letters in it and still be junk.
-console.log("\nwhy each skip was skipped:");
+console.log("\nbroken or blank?");
 for (const item of items) {
   const check = checkSignal(item.body);
   if (!check.hasSignal) {
-    const rule = check.reason?.startsWith("the message is corrupted")
-      ? "rule 1 — corrupted"
-      : "rule 2 — nothing to read";
+    const rule = check.reason?.startsWith("broken") ? "BROKEN" : "BLANK";
     console.log(`  ${item.id}  ${rule}`);
   }
 }
 
-// Threshold sensitivity, measured ONLY over messages rule 1 lets through —
-// mixing in a corrupted message would produce a meaningless range.
-const notCorrupted = items.filter(
-  (i) => !checkSignal(i.body).reason?.startsWith("the message is corrupted"),
-);
-const junk = notCorrupted.filter((i) => EXPECT_SKIPPED.has(i.id));
-const real = notCorrupted.filter((i) => !EXPECT_SKIPPED.has(i.id));
-const maxJunk = Math.max(...junk.map((i) => checkSignal(i.body).realChars));
-const minReal = Math.min(...real.map((i) => checkSignal(i.body).realChars));
+/**
+ * The regression that matters most.
+ *
+ * An earlier version required a minimum of 15 characters. It looked sensible
+ * and it would have parked a client replying "ok". A real client's message
+ * silently never reaching a person is the worst thing this system can do, so
+ * short-but-real bodies get asserted rather than assumed.
+ */
+const MUST_PASS_SHORT = ["ok", "yes please", "a", "Yes.", "call me", "no thanks"];
 
-console.log(
-  `\nrule 2 separation: the emptiest junk message has ${maxJunk} letters/digits, ` +
-    `the quietest real one has ${minReal}.\n` +
-    `Any threshold in (${maxJunk}, ${minReal}] behaves identically — ` +
-    `${MIN_REAL_CHARS} is not fitted to the data.`,
-);
-console.log(
-  `distribution: ${real
-    .map((i) => checkSignal(i.body).realChars)
-    .sort((a, b) => a - b)
-    .join(", ")}`,
-);
+console.log("\nnot blank — short but real, these must get through:");
+for (const body of MUST_PASS_SHORT) {
+  const check = checkSignal(body);
+  const mark = check.hasSignal ? "✓" : "✗";
+  console.log(`  ${mark} ${JSON.stringify(body).padEnd(14)} ${body.length} chars`);
+  if (!check.hasSignal) {
+    failures.push(`"${body}" was parked — a real short reply must reach the model`);
+  }
+}
+
+/** And things with genuinely nothing in them must not. */
+const MUST_BE_PARKED = [".", "  ", "...", "-", "?!"];
+
+console.log("\nblank — these must be parked:");
+for (const body of MUST_BE_PARKED) {
+  const check = checkSignal(body);
+  const mark = !check.hasSignal ? "✓" : "✗";
+  console.log(`  ${mark} ${JSON.stringify(body)}`);
+  if (check.hasSignal) {
+    failures.push(`"${body}" got through — it is blank, no letters or numbers`);
+  }
+}
 
 if (failures.length) {
   console.error(`\n✗ ${failures.length} FAILURE(S):`);

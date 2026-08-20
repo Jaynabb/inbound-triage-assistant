@@ -57,7 +57,7 @@ writing — re-running the queue shouldn't shuffle the categories. Configurable
 via `TRIAGE_MODEL`.
 
 **Seven categories, not the four suggested.** `partner`, `recruiter` and
-`unclear` were added because three messages didn't fit. See RATIONALE (a).
+`needs_human` were added because three messages didn't fit. See RATIONALE (a).
 
 **Priority is one question: what breaks if this waits?** Something breaks today
 is high, nothing breaks but someone's waiting is medium, nothing breaks and
@@ -71,9 +71,9 @@ things and value was a fifth I'd added. Once priority was one question, the
 second axis was answering something nobody asked, and "high priority, low value"
 read as contradictory even though both halves were true.
 
-**Two junk messages are filtered before the API call**, and the filter reads the
-message body only — never the subject or sender. `inb-005` has no subject and is
-the most urgent message in the inbox. See RATIONALE (d).
+**Two junk messages are filtered before the API call** — one broken, one blank.
+The filter reads the message body only, never the subject or sender. `inb-005`
+has no subject and is the most urgent message in the inbox. See RATIONALE (d).
 
 **An answer key, written by hand before running the model** (`eval/answer-key.json`),
 turns "looks about right" into a number. `scripts/eval.mts` scores against it.
@@ -108,32 +108,59 @@ know which advisor owns them.
 ```
 trigger:  new message arrives in the shared inbox
    ↓
-filter:   is it corrupted?  is there anything in it?
-          ├─ no  → park it in "couldn't read". Never call the model.
-          └─ yes ↓
+filter:   is it BROKEN or BLANK?
+          ├─ yes → park it in "couldn't read". Never call the model.
+          └─ no  ↓
 action:   call the triage endpoint
           → write the result to the Messages table
           → if priority is high, notify the advisor who owns
             that client
 ```
 
-**The filter step is code that already exists** — it's `lib/signal.ts`, and in
-production it moves out of the app and into an n8n Code node so it runs before
-the model call instead of after. It asks two questions:
+**The filter is one rule:** *if the message is broken or blank, park it;
+otherwise triage it.*
 
-1. **Is the message corrupted?** Does it contain characters a person can't
-   type — null bytes, control codes, or the `�` left behind when text is
-   decoded with the wrong encoding? `inb-011` fails here.
-2. **Is there anything in it?** Count the letters and numbers. `inb-010` is a
-   single period, so it has zero.
+- **broken** — it contains characters a person can't type (control codes, or the
+  `�` left when text is decoded with the wrong encoding). It arrived damaged.
+- **blank** — it contains no letters or numbers at all. There's nothing in it.
 
-Everything else goes through. The eleven real messages carry 67–147 letters and
-digits and none are corrupted, so nothing sits near either line.
+Those are two different failures, so no single test catches both: a
+letters-only check misses `inb-011`, which is full of letters and still
+garbage, and a corruption-only check misses `inb-010`, because a period is a
+perfectly valid character.
 
-The no-branch **parks** messages rather than deleting them. If mail starts
-arriving broken you want to watch that rate climb, not have it vanish quietly —
-which is the same reason both rows still render in the UI instead of
-disappearing.
+**The code already exists** — `lib/signal.ts` — and in production it doesn't
+need porting, because it's two conditions an n8n **IF node** does natively:
+
+| | condition | catches |
+|---|---|---|
+| **broken** | `body` **matches regex** `[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\uFFFD]` | `inb-011` — control codes, and the replacement character left when text decodes wrong |
+| **blank** | `body` **does not match regex** `[a-zA-Z0-9]` | `inb-010` — a single period, so not one letter or number in it |
+
+Combine on **ANY**, send the true branch to "couldn't read" and the false
+branch to triage. One node, two dropdown conditions, no expressions and no Code
+node.
+
+**Use IF, not Filter.** Filter discards what doesn't match. IF gives you both
+branches, so rejected messages get parked somewhere countable. If mail starts
+arriving broken you want to watch that rate climb, not have it vanish — the
+same reason both rows still render in the UI instead of disappearing.
+
+**"Blank" has no minimum length, deliberately.** An earlier version required 15
+characters. It looked reasonable and it was wrong — a client replying "ok" is
+two characters, and a real client's message silently never reaching a person is
+the worst thing this system can do. So blank means *no letters or numbers at
+all*, with nothing to tune. `scripts/verify-signal.mts` asserts it: `"ok"`,
+`"a"` and `"call me"` all get through; `"."`, `"..."` and `"?!"` are all parked.
+
+**And this deliberately isn't AI.** You shouldn't need a language model to
+notice a message is empty. A regex is instant, costs nothing, and can't have a
+bad day. Using an LLM here would be slower, more expensive per message, and
+less reliable than the thing it replaced.
+
+**Known limitation:** an emoji-only reply — a client sending just 👍 — has no
+letters or numbers and gets parked. It's in the "couldn't read" branch rather
+than deleted, so it's recoverable, and there's nothing in it to triage anyway.
 
 The point is the trigger. Running triage on a schedule is the wrong shape: if
 the batch runs at 8am and an angry client writes at 9am, nobody sees it until
