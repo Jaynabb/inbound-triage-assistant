@@ -190,6 +190,17 @@ client, so it believes him. But the firm has a list of its clients. Match the
 sender's email against that list and it's a fact, not a guess. Use the model for
 judgment — intent, urgency, tone. Use the database for facts.
 
+The same thing applies to `inb-009`. Sam Cho says "just following up on our
+conversation" and nothing else, and the model correctly calls it `unclear` at
+35% confidence, because from that text alone it genuinely can't be known. But
+that isn't the model failing. The information isn't missing from the world, it's
+missing from the message. Once n8n is triggering this on arrival it can attach
+the previous thread, and there's nothing left to guess about.
+
+Both of those are the same principle: don't ask the model to work out something
+the firm could have looked up before asking. Look up the facts first, then let
+the model judge the part that actually needs judgment.
+
 The second risk is alerting. If the model is wrong about priority and it pings
 someone's phone, it cries wolf and people start ignoring it. That's why only
 high pushes, and why I'd want priority accuracy tracked over time in production
