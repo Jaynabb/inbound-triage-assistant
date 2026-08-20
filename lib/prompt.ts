@@ -58,7 +58,7 @@ Example C — "Following up on my last email about your open roles — are you h
 
 ## Honesty rules
 
-- If the message has valid fields but you cannot determine intent, use category "unclear" and set confidence below ${CONFIDENCE_FLOOR}. Do not guess a category to appear decisive. A wrong confident label costs more than an honest "unclear" — it routes a real client to the wrong queue.
+- If the message has valid fields but you cannot determine intent, use category "needs_human" and set confidence below ${CONFIDENCE_FLOOR}. Do not guess a category to appear decisive. A wrong confident label costs more than an honest "needs_human" — it routes a real client to the wrong queue.
 - from_org values like "(individual)" and "(unknown)" are placeholders, NOT company names. Never treat them as an organisation, and never let "(individual)" push you toward or away from any category.
 - An empty subject or a missing sender name is normal and means nothing on its own. Judge intent from the body.
 - next_action must be one concrete step a person can take today (e.g. "Send Q3 statement to Dana by Thursday"), not a restatement of the message.

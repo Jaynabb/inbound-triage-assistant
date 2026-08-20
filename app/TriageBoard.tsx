@@ -241,8 +241,14 @@ function Row({ item, triaged }: { item: InboundItem; triaged: TriagedItem }) {
             rather than in a footer. */}
         {r && (
           <span className="what">
-            {triaged.status === "review" && <span className="flag">needs a human</span>}
-            <span className="tag">{r.category.replace("_", " ")}</span>
+            {/* The flag only appears when the category doesn't already say it —
+                low confidence on a category the model WAS willing to pick. */}
+            {triaged.status === "review" && r.category !== "needs_human" && (
+              <span className="flag">needs a human</span>
+            )}
+            <span className={`tag${r.category === "needs_human" ? " flag" : ""}`}>
+              {r.category.replace("_", " ")}
+            </span>
           </span>
         )}
       </div>
@@ -259,15 +265,21 @@ function Row({ item, triaged }: { item: InboundItem; triaged: TriagedItem }) {
           </div>
           {/* Own row, so an opened panel can take the full width instead of
               being squeezed inside the action line's flex row. */}
+          {/* `why` appears only on rows flagged for a human. A tool that
+              justifies all 11 decisions reads like a demo; showing its working
+              on the one it wasn't sure about is what an operator actually
+              needs. The reasoning stays in the saved JSON either way. */}
           <div className="toggles">
             <details className="why">
               <summary>message</summary>
               <pre className="why-body raw-body">{item.body}</pre>
             </details>
-            <details className="why">
-              <summary>why</summary>
-              <p className="why-body">{r.reasoning}</p>
-            </details>
+            {triaged.status === "review" && (
+              <details className="why">
+                <summary>why it needs a human</summary>
+                <p className="why-body">{r.reasoning}</p>
+              </details>
+            )}
           </div>
         </>
       ) : (

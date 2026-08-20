@@ -1,59 +1,60 @@
 /**
- * Pre-flight signal check — runs BEFORE any model call.
+ * The pre-flight check — runs BEFORE any model call.
  *
- * Design rule, and the most important line in this file:
+ * Two questions, in this order:
  *
- *   This function only ever looks at the BODY. It never inspects subject,
- *   from_name, or from_org.
+ *   1. Is the message corrupted?  Does it contain characters a person cannot
+ *                                 type — null bytes, control codes, or the "�"
+ *                                 left behind when text is decoded with the
+ *                                 wrong encoding? Then it arrived broken.
  *
- * Why: inb-005 in the sample has no subject at all and is the single most
- * urgent message in the inbox (existing client, disputed fee, "someone needs
- * to call me back today"). inb-008 has no from_name and is a newsletter. A
- * filter keyed on "missing fields" would drop the most important message and
- * keep the least. Missing metadata is normal; an empty body is not.
+ *   2. Is there anything in it?   Count the letters and numbers. If there are
+ *                                 barely any, there is nothing to read.
  *
- * Two jobs:
- *   1. Don't spend an API call on content-free input (the 10k/day cost story).
- *   2. Give the UI an honest reason string instead of a silent drop.
+ * That is the whole filter. Anything passing both goes to the model.
+ *
+ * An earlier version also stripped MIME headers, multipart boundaries, RFC 2047
+ * encoded-words and forwarded-message markers before counting. All of it turned
+ * out to be redundant — the corrupted check already catches every message those
+ * patterns were there for — and it made the filter hard to explain. A rule you
+ * can't state plainly is a rule you can't defend.
+ *
+ * THE RULE THAT MATTERS: this only ever looks at the BODY. Never the subject,
+ * never the sender. inb-005 has no subject and is the most urgent message in
+ * the inbox — an existing client, angry about a fee, asking for a callback
+ * today. A filter keyed on missing fields would drop him and keep the
+ * newsletter. Missing metadata is normal. An empty body is not.
+ *
+ * Measured against the sample: the two junk messages fail (one corrupted, one
+ * with zero readable characters). The eleven real ones carry 67–147 letters and
+ * digits and none are corrupted. Nothing sits near the line.
  */
 
-/** Artifacts that are transport noise, not human content. */
-const NOISE_PATTERNS: Array<[RegExp, string]> = [
-  // Control characters (keep \n and \t — they're real formatting).
-  [/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, ""],
-  // Unicode replacement char — the tell for mangled encoding.
-  [/�/g, ""],
-  // MIME headers and multipart boundaries.
-  [/Content-Type:\s*\S+/gi, ""],
-  [/boundary=\S+/gi, ""],
-  [/Content-Transfer-Encoding:\s*\S+/gi, ""],
-  // RFC 2047 encoded-word fragments (e.g. "=?utf-8?B?").
-  [/=\?[\w-]+\?[BQ]\?[^?]*\??/gi, ""],
-  // Mail-client truncation markers.
-  [/-{2,}\s*forwarded message[^-]*-{2,}/gi, ""],
-  [/-{2,}\s*(original message|message truncated)[^-]*-{2,}/gi, ""],
-];
+/**
+ * Characters that never appear in text a human typed: C0 control codes (minus
+ * tab, newline and carriage return, which are real formatting), DEL, and the
+ * Unicode replacement character.
+ */
+const CORRUPTED = new RegExp(
+  "[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F\\uFFFD]",
+);
 
 /**
- * Minimum letters/digits required to be worth a model call.
+ * Minimum letters and digits to be worth a model call.
  *
- * Calibrated against the sample: the shortest legitimate message body is
- * inb-009 at ~90 alphanumeric chars ("just following up..." — vague, but real
- * and correctly routed to `unclear` by the model, not skipped here). The
- * garbage items land at 0. 15 sits in the wide gap between them, so this
- * threshold is not load-bearing — anything from 1 to ~80 produces identical
- * behaviour on this data. Stated explicitly because a magic number that
- * happens to work is a fair thing to be challenged on.
+ * Not a tuned number. The junk in the sample has 0; the quietest real message
+ * has 67. Anything in that gap behaves identically, so this sits well clear of
+ * both rather than being fitted to the data.
  */
 export const MIN_REAL_CHARS = 15;
 
 export interface SignalCheck {
   hasSignal: boolean;
-  /** Body with transport noise removed. This is what we send to the model. */
+  /** The body with whitespace normalised. This is what goes to the model. */
   cleaned: string;
-  /** Count of letters/digits surviving the strip. */
+  /** How many letters and digits the body contains. */
   realChars: number;
-  /** Human-readable reason when hasSignal is false. */
+  /** Plain-language reason when hasSignal is false. Rendered in the UI. */
   reason: string | null;
 }
 
@@ -63,26 +64,35 @@ export function checkSignal(rawBody: unknown): SignalCheck {
       hasSignal: false,
       cleaned: "",
       realChars: 0,
-      reason: "body missing or not a string",
+      reason: "the message has no body",
     };
   }
 
-  let cleaned = rawBody;
-  for (const [pattern, replacement] of NOISE_PATTERNS) {
-    cleaned = cleaned.replace(pattern, replacement);
+  const realChars = (rawBody.match(/[\p{L}\p{N}]/gu) ?? []).length;
+  const cleaned = rawBody.replace(/\s+/g, " ").trim();
+
+  // 1. Is it corrupted?
+  if (CORRUPTED.test(rawBody)) {
+    return {
+      hasSignal: false,
+      cleaned,
+      realChars,
+      reason:
+        "the message is corrupted — it contains characters that aren't readable text",
+    };
   }
-  cleaned = cleaned.replace(/\s+/g, " ").trim();
 
-  // Count only letters and digits. Punctuation alone ("." in inb-010) is not
-  // content, and neither is a line of dashes.
-  const realChars = (cleaned.match(/[\p{L}\p{N}]/gu) ?? []).length;
-
+  // 2. Is there anything in it?
   if (realChars < MIN_REAL_CHARS) {
-    const reason =
-      realChars === 0
-        ? "no readable content after stripping transport noise"
-        : `only ${realChars} readable characters (min ${MIN_REAL_CHARS})`;
-    return { hasSignal: false, cleaned, realChars, reason };
+    return {
+      hasSignal: false,
+      cleaned,
+      realChars,
+      reason:
+        realChars === 0
+          ? "there's nothing to read — the message contains no letters or numbers"
+          : `there's almost nothing to read — only ${realChars} letters or numbers in the whole message`,
+    };
   }
 
   return { hasSignal: true, cleaned, realChars, reason: null };

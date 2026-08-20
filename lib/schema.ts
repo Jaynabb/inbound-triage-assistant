@@ -17,7 +17,8 @@ import { z } from "zod";
  *     on our conversation", org "(unknown)"). Forcing it into a bucket would
  *     manufacture a confidence the message doesn't support.
  *
- * `unclear` is deliberately a routing destination, not a failure. See
+ * `needs_human` is deliberately a routing destination, not a failure — and it's
+ * named for what to DO rather than for how the message reads. See
  * CONFIDENCE_FLOOR below for the guard against it becoming a dumping ground.
  */
 export const CATEGORIES = [
@@ -27,7 +28,7 @@ export const CATEGORIES = [
   "partner",
   "recruiter",
   "spam",
-  "unclear",
+  "needs_human",
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];
@@ -41,7 +42,7 @@ export const CATEGORY_DEFINITIONS: Record<Category, string> = {
   partner: "Proposing a two-way business relationship — referrals, co-advisory. Revenue coming in.",
   recruiter: "Recruiting for a role. Neither buying nor selling a service.",
   spam: "Automated, bulk, or no-intent. Newsletters, blasts, unsubscribe footers.",
-  unclear: "Fields are valid but intent cannot be determined without more context. Routes to a human.",
+  needs_human: "Fields are valid but intent cannot be determined from the message alone. Route it to a person rather than guess.",
 };
 
 /**
@@ -112,7 +113,7 @@ export const TriageResultSchema = z.object({
 export type TriageResult = z.infer<typeof TriageResultSchema>;
 
 /**
- * Guard against `unclear` becoming a dumping ground: if the model returns a
+ * Guard against `needs_human` becoming a dumping ground: if the model returns a
  * confident category we keep it, but if it returns ANY category below this
  * floor we surface it for review rather than trusting the label.
  */

@@ -107,11 +107,33 @@ know which advisor owns them.
 
 ```
 trigger:  new message arrives in the shared inbox
+   ↓
+filter:   is it corrupted?  is there anything in it?
+          ├─ no  → park it in "couldn't read". Never call the model.
+          └─ yes ↓
 action:   call the triage endpoint
           → write the result to the Messages table
           → if priority is high, notify the advisor who owns
             that client
 ```
+
+**The filter step is code that already exists** — it's `lib/signal.ts`, and in
+production it moves out of the app and into an n8n Code node so it runs before
+the model call instead of after. It asks two questions:
+
+1. **Is the message corrupted?** Does it contain characters a person can't
+   type — null bytes, control codes, or the `�` left behind when text is
+   decoded with the wrong encoding? `inb-011` fails here.
+2. **Is there anything in it?** Count the letters and numbers. `inb-010` is a
+   single period, so it has zero.
+
+Everything else goes through. The eleven real messages carry 67–147 letters and
+digits and none are corrupted, so nothing sits near either line.
+
+The no-branch **parks** messages rather than deleting them. If mail starts
+arriving broken you want to watch that rate climb, not have it vanish quietly —
+which is the same reason both rows still render in the UI instead of
+disappearing.
 
 The point is the trigger. Running triage on a schedule is the wrong shape: if
 the batch runs at 8am and an angry client writes at 9am, nobody sees it until

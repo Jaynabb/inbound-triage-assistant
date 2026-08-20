@@ -278,7 +278,7 @@ export async function triageOne(
 /**
  * Apply the confidence floor.
  *
- * This is the guard against `unclear` becoming a dumping ground, and against
+ * This is the guard against `needs_human` becoming a dumping ground, and against
  * the opposite failure — a confidently wrong label on a real client. Anything
  * the model is unsure about is marked for review REGARDLESS of which category
  * it picked, so low confidence surfaces rather than hides.
@@ -291,13 +291,13 @@ function finalise(
   truncations: string[] = [],
 ): TriagedItem {
   const needsReview =
-    result.confidence < CONFIDENCE_FLOOR || result.category === "unclear";
+    result.confidence < CONFIDENCE_FLOOR || result.category === "needs_human";
   return {
     id,
     status: needsReview ? "review" : "ok",
     result,
     note: needsReview
-      ? result.category === "unclear"
+      ? result.category === "needs_human"
         ? "model could not determine intent"
         : `low confidence (${result.confidence.toFixed(2)} < ${CONFIDENCE_FLOOR})`
       : null,

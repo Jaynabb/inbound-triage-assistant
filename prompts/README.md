@@ -35,7 +35,7 @@ The system prompt has five parts, in this order:
 4. **Worked examples** — three, showing the rule in both directions (big money
    with no deadline → medium; trivial admin with a 24-hour deadline → high;
    unsolicited outreach → low).
-5. **Honesty rules** — when to use `unclear`, that `(individual)` and
+5. **Honesty rules** — when to use `needs_human`, that `(individual)` and
    `(unknown)` are placeholders rather than company names, and that a missing
    subject or sender means nothing on its own.
 

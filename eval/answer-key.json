@@ -46,7 +46,7 @@
       "why": "Automated bulk newsletter. Nothing to action."
     },
     "inb-009": {
-      "category": "unclear",
+      "category": "needs_human",
       "priority": "medium",
       "why": "Valid fields, unknowable intent. Routes to a human on category regardless of priority."
     },

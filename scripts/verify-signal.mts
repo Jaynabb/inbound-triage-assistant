@@ -67,20 +67,42 @@ for (const id of MUST_SURVIVE) {
   }
 }
 
-// Threshold sensitivity: prove the magic number isn't load-bearing.
-const charCounts = items.map((i) => checkSignal(i.body).realChars).sort((a, b) => a - b);
-const maxSkipped = Math.max(
-  ...items.filter((i) => EXPECT_SKIPPED.has(i.id)).map((i) => checkSignal(i.body).realChars),
+// Which rule caught each skipped message. The two rules are independent, so
+// reporting them together would be misleading — a corrupted message can have
+// plenty of letters in it and still be junk.
+console.log("\nwhy each skip was skipped:");
+for (const item of items) {
+  const check = checkSignal(item.body);
+  if (!check.hasSignal) {
+    const rule = check.reason?.startsWith("the message is corrupted")
+      ? "rule 1 — corrupted"
+      : "rule 2 — nothing to read";
+    console.log(`  ${item.id}  ${rule}`);
+  }
+}
+
+// Threshold sensitivity, measured ONLY over messages rule 1 lets through —
+// mixing in a corrupted message would produce a meaningless range.
+const notCorrupted = items.filter(
+  (i) => !checkSignal(i.body).reason?.startsWith("the message is corrupted"),
 );
-const minKept = Math.min(
-  ...items.filter((i) => !EXPECT_SKIPPED.has(i.id)).map((i) => checkSignal(i.body).realChars),
+const junk = notCorrupted.filter((i) => EXPECT_SKIPPED.has(i.id));
+const real = notCorrupted.filter((i) => !EXPECT_SKIPPED.has(i.id));
+const maxJunk = Math.max(...junk.map((i) => checkSignal(i.body).realChars));
+const minReal = Math.min(...real.map((i) => checkSignal(i.body).realChars));
+
+console.log(
+  `\nrule 2 separation: the emptiest junk message has ${maxJunk} letters/digits, ` +
+    `the quietest real one has ${minReal}.\n` +
+    `Any threshold in (${maxJunk}, ${minReal}] behaves identically — ` +
+    `${MIN_REAL_CHARS} is not fitted to the data.`,
 );
 console.log(
-  `\nseparation: garbage tops out at ${maxSkipped} real chars, ` +
-    `the quietest real message has ${minKept}. ` +
-    `Any threshold in (${maxSkipped}, ${minKept}] behaves identically.`,
+  `distribution: ${real
+    .map((i) => checkSignal(i.body).realChars)
+    .sort((a, b) => a - b)
+    .join(", ")}`,
 );
-console.log(`distribution: ${charCounts.join(", ")}`);
 
 if (failures.length) {
   console.error(`\n✗ ${failures.length} FAILURE(S):`);
