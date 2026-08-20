@@ -124,12 +124,17 @@ main {
 
 /* ---------- the day's shape --------------------------------- */
 
+/* Control bar. Once results land the counts live in the panels below, so this
+   collapses to just the run info and the button. */
 .shape {
   display: flex;
   align-items: baseline;
-  gap: 24px;
+  gap: 20px;
   flex-wrap: wrap;
-  padding: 20px 0 24px;
+  padding: 18px 0 20px;
+  margin-bottom: 0;
+}
+.shape:has(.tally) {
   border-bottom: 1px solid var(--rule);
   margin-bottom: 30px;
 }
@@ -156,16 +161,73 @@ main {
   color: var(--ink-3);
 }
 
-/* Everything that isn't urgent, in one quiet line. */
-.rest {
+.spacer { flex: 1 1 auto; }
+
+/* ---------- count panels ------------------------------------ */
+/* Each number is real and each panel filters the list. Nothing here is a
+   badge for the sake of having a badge. */
+
+.panels {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 34px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 15px 16px 13px;
+  background: var(--sheet);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.panel:hover:not(:disabled) { border-color: var(--rule-strong); }
+.panel:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+
+.panel-n {
+  font-family: var(--serif);
+  font-size: 30px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.panel-label {
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.05em;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-3);
 }
 
-.spacer { flex: 1 1 auto; }
+/* The urgent panel wears the same negative treatment as the urgent rows, so
+   the count and the messages read as one signal rather than two. */
+.panel-high {
+  background: var(--negative-bg);
+  border-color: var(--negative-bg);
+  color: var(--negative-ink);
+}
+.panel-high .panel-label { color: var(--negative-ink-2); }
+.panel-high:hover:not(:disabled) { border-color: var(--negative-rule); }
+
+.panel-low, .panel-inert { background: var(--sheet-sunk); }
+.panel-inert .panel-n { color: var(--ink-3); }
+
+.panel.is-active { border-color: var(--ink); }
+.panel-high.is-active { border-color: var(--brass); }
+
+.panel.is-empty { opacity: 0.45; cursor: default; }
+
+@media (max-width: 620px) {
+  .panels { grid-template-columns: repeat(2, 1fr); }
+}
 
 .standin {
   font-size: 14px;

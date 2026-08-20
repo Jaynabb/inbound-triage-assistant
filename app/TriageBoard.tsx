@@ -26,11 +26,13 @@ interface Meta {
  */
 
 /** Band headings are written from the reader's side, not the schema's. */
-const BANDS: Array<{ key: Priority; title: string }> = [
-  { key: "high", title: "Needs a response today" },
-  { key: "medium", title: "Can wait" },
-  { key: "low", title: "No rush" },
+const BANDS: Array<{ key: Priority; title: string; short: string }> = [
+  { key: "high", title: "Needs a response today", short: "Today" },
+  { key: "medium", title: "Can wait", short: "Can wait" },
+  { key: "low", title: "No rush", short: "No rush" },
 ];
+
+type BandKey = Priority | "inert";
 
 export default function TriageBoard({ items }: { items: InboundItem[] }) {
   const [results, setResults] = useState<Record<string, TriagedItem> | null>(null);
@@ -40,6 +42,8 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
   /* When this run finished. Set on the client after the fetch resolves, so
      there's no server/client hydration mismatch on an SSR'd timestamp. */
   const [ranAt, setRanAt] = useState<string | null>(null);
+  /* Null = show everything. Set by clicking a panel. */
+  const [only, setOnly] = useState<BandKey | null>(null);
 
   async function run() {
     setRunning(true);
@@ -84,17 +88,7 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
   return (
     <>
       <div className="shape">
-        {bands ? (
-          <>
-            <Tally n={bands.high.length} label="need a response today" />
-            <span className="rest">
-              {bands.medium.length} can wait · {bands.low.length} no rush ·{" "}
-              {bands.inert.length} unreadable
-            </span>
-          </>
-        ) : (
-          <Tally n={items.length} label="waiting in the shared inbox" />
-        )}
+        {!bands && <Tally n={items.length} label="waiting in the shared inbox" />}
 
         <span className="spacer" />
 
@@ -109,6 +103,30 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
         </button>
       </div>
 
+      {/* Counts panel. Every number here is real and every panel filters the
+          list — no badge that doesn't do anything. */}
+      {bands && (
+        <div className="panels">
+          {BANDS.map(({ key, short }) => (
+            <Panel
+              key={key}
+              n={bands[key].length}
+              label={short}
+              tone={key}
+              active={only === key}
+              onClick={() => setOnly(only === key ? null : key)}
+            />
+          ))}
+          <Panel
+            n={bands.inert.length}
+            label="Unreadable"
+            tone="inert"
+            active={only === "inert"}
+            onClick={() => setOnly(only === "inert" ? null : "inert")}
+          />
+        </div>
+      )}
+
       {fatal && <div className="fatal">{fatal}</div>}
 
       {!bands && !fatal && (
@@ -121,16 +139,48 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
       {bands && (
         <>
           {BANDS.map(({ key, title }) =>
-            bands[key].length ? (
+            bands[key].length && (!only || only === key) ? (
               <Band key={key} title={title} items={bands[key]} results={results!} />
             ) : null,
           )}
-          {bands.inert.length > 0 && (
+          {bands.inert.length > 0 && (!only || only === "inert") && (
             <Band title="Nothing to act on" items={bands.inert} results={results!} />
           )}
         </>
       )}
     </>
+  );
+}
+
+/**
+ * One count panel. Clicking filters the list to that band; clicking again
+ * clears it. The urgent panel carries the same negative treatment as the
+ * urgent rows, so the two read as the same signal.
+ */
+function Panel({
+  n,
+  label,
+  tone,
+  active,
+  onClick,
+}: {
+  n: number;
+  label: string;
+  tone: BandKey;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={`panel panel-${tone}${active ? " is-active" : ""}${n === 0 ? " is-empty" : ""}`}
+      onClick={onClick}
+      aria-pressed={active}
+      disabled={n === 0}
+    >
+      <span className="panel-n">{n}</span>
+      <span className="panel-label">{label}</span>
+    </button>
   );
 }
 
