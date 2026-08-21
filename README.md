@@ -15,7 +15,7 @@ cp .env.example .env.local     # add your ANTHROPIC_API_KEY
 npm run dev                    # http://localhost:3000
 ```
 
-Click **Triage 13 messages**. Takes about 10 seconds.
+Click **Triage the inbox**. Takes about 10 seconds.
 
 Two useful things from the command line:
 
@@ -51,10 +51,12 @@ not a system of record. In production the results land in the Messages table
 described below. Worth flagging the gap rather than leaving it to be found: the
 Airtable sketch stores triage output, the running app does not.
 
-**Haiku 4.5, `temperature: 0`.** Classification against a tight schema is what a
-small fast model is for. Temperature 0 because this is classification, not
-writing — re-running the queue shouldn't shuffle the categories. Configurable
-via `TRIAGE_MODEL`.
+**`claude-haiku-4-5-20251001`, `temperature: 0`.** Classification against a tight
+schema is what a small fast model is for. Temperature 0 because this is
+classification, not writing — re-running the queue shouldn't shuffle the
+categories. Override with `TRIAGE_MODEL` if you want to compare against a larger
+one; `scripts/eval.mts --model <id>` scores any model against the same answer
+key.
 
 **Seven categories, not the four suggested.** `partner`, `recruiter` and
 `needs_human` were added because three messages didn't fit. See RATIONALE (a).
@@ -90,8 +92,9 @@ second axis was answering something nobody asked, and "high priority, low value"
 read as contradictory even though both halves were true.
 
 **Two junk messages are filtered before the API call** — one broken, one blank.
-The filter reads the message body only, never the subject or sender. `inb-005`
-has no subject and is the most urgent message in the inbox. See RATIONALE (d).
+The filter reads the message body only, never the subject or sender: `inb-005`
+has no subject and is the most urgent message in the inbox, because it's a
+voicemail transcript and voicemails don't have subject lines. See RATIONALE (d).
 
 **An answer key, written by hand before running the model** (`eval/answer-key.json`),
 turns "looks about right" into a number. `scripts/eval.mts` scores against it.
@@ -105,7 +108,7 @@ Clients                    Messages
 ─────────────              ──────────────────────────
 name                       from_email
 email          ◄────────── Client         (linked)
-owning_advisor             received_at
+owning_advisor             received_at / channel
                            category / priority
                            summary / next_action
                            status
@@ -148,7 +151,7 @@ action     call the triage endpoint
 ```
 
 **Many triggers, one triage.** The normalise step is what makes that possible:
-everything downstream reads the same six fields, so the filter and the model
+everything downstream reads the same seven fields, so the filter and the model
 never need to know where a message came from. Adding a channel means adding a
 trigger and a mapping — nothing after that changes.
 
@@ -161,8 +164,20 @@ LinkedIn — and because it explains the missing fields. Voicemails have no
 subject line. Neither do most web forms. That's the whole reason the filter
 reads the body and nothing else.
 
-**The filter is one rule:** *if the message is broken or blank, park it;
-otherwise triage it.*
+**The trigger is the point.** Running triage on a schedule is the wrong shape:
+if the batch runs at 8am and an angry client writes at 9am, nobody sees it until
+the next morning — the one time-critical message is the one the system is
+slowest on. Firing on arrival fixes that without needing more capacity.
+
+**Only `high` notifies anyone.** If everything pushes, nothing is a signal.
+
+I've deliberately not named the notification channel. Arootah's stack mentions
+Airtable, n8n/Zapier and a CRM, and I don't know what they use for alerts — so
+that's a question rather than an assumption.
+
+## The pre-flight filter
+
+**One rule:** *if the message is broken or blank, park it; otherwise triage it.*
 
 - **broken** — it contains characters a person can't type (control codes, or the
   `�` left when text is decoded with the wrong encoding). It arrived damaged.
@@ -206,17 +221,6 @@ less reliable than the thing it replaced.
 letters or numbers and gets parked. It's in the "couldn't read" branch rather
 than deleted, so it's recoverable, and there's nothing in it to triage anyway.
 
-The point is the trigger. Running triage on a schedule is the wrong shape: if
-the batch runs at 8am and an angry client writes at 9am, nobody sees it until
-the next morning — the one time-critical message is the one the system is
-slowest on. Firing on arrival fixes that without needing more capacity.
-
-Only `high` notifies anyone. If everything pushes, nothing is a signal.
-
-I've deliberately not named the notification channel. Arootah's stack mentions
-Airtable, n8n/Zapier and a CRM, and I don't know what they use for alerts — so
-that's a question rather than an assumption.
-
 ## How I used AI
 
 I used it the whole way through. Claude Code to build it, Claude for the triage
@@ -224,7 +228,7 @@ itself. What I spent my own time on was the decisions: what the categories
 should be, what priority actually means, what to do when the model breaks the
 rules, and building the answer key by hand before I let the model near it.
 
-**Where I overrode it.** While we were working out the n8n automation, it wrote
+**Where I overrode it.** While I was working out the n8n automation, it wrote
 a step that sends a Slack message to the advisor. I stopped it, because Slack
 isn't mentioned anywhere in the job description or the brief. The tools listed
 are Airtable, n8n, Zapier and a CRM. It added a tool nobody said they use.
@@ -240,7 +244,7 @@ engineer walking into someone else's setup.
 
 _(Second one if it's useful: it capped the model's `reasoning` field at 300
 characters. I asked where that number came from, and said trimming an
-explanation could cut out important context. It couldn't defend the limit, so we
+explanation could cut out important context. It couldn't defend the limit, so I
 dropped it. That's written up in RATIONALE (b).)_
 
 ## Notes
@@ -248,5 +252,6 @@ dropped it. That's written up in RATIONALE (b).)_
 - `.env.example` is committed; `.env.local` is gitignored and holds the key.
 - `prompts/` has the system prompt and notes on how structured output is
   enforced.
-- The prompt is generated from `lib/schema.ts` rather than written separately,
-  so the model's rulebook can't drift from the validation.
+- The prompt is a hand-written template whose category and priority sections are
+  generated from `lib/schema.ts`, so the model's rulebook can't disagree with the
+  validation about what a valid category is.
