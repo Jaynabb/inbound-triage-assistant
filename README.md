@@ -123,17 +123,43 @@ know which advisor owns them.
 
 ## One automation I'd add (n8n)
 
+**The queue isn't all email.** Of these 13, eight arrive by email, three by web
+form, one by LinkedIn and one as a transcribed voicemail. So it isn't one
+trigger — it's several, all landing in the same place:
+
 ```
-trigger:  new message arrives in the shared inbox
+triggers   email inbox      (Gmail / Outlook node)
+           web form         (Webhook node)
+           LinkedIn         (no first-party trigger; needs a
+                             third-party node or a manual step)
+           voicemail        (telephony → transcription → webhook)
    ↓
-filter:   is it BROKEN or BLANK?
-          ├─ yes → park it in "couldn't read". Never call the model.
-          └─ no  ↓
-action:   call the triage endpoint
-          → write the result to the Messages table
-          → if priority is high, notify the advisor who owns
-            that client
+normalise  map each source into one shape:
+           id · received_at · channel · from_name ·
+           from_org · subject · body
+   ↓
+filter     is it BROKEN or BLANK?
+           ├─ yes → park in "couldn't read". Never call the model.
+           └─ no  ↓
+action     call the triage endpoint
+           → write the result to the Messages table
+           → if priority is high, notify the advisor who owns
+             that client
 ```
+
+**Many triggers, one triage.** The normalise step is what makes that possible:
+everything downstream reads the same six fields, so the filter and the model
+never need to know where a message came from. Adding a channel means adding a
+trigger and a mapping — nothing after that changes.
+
+`data/inbound.json` is already that normalised shape, which is why the tool
+handles four channels today without a line of channel-specific code.
+
+**`channel` is carried through and shown on every row**, because it changes what
+you actually do — you call a voicemail back, you answer a LinkedIn message on
+LinkedIn — and because it explains the missing fields. Voicemails have no
+subject line. Neither do most web forms. That's the whole reason the filter
+reads the body and nothing else.
 
 **The filter is one rule:** *if the message is broken or blank, park it;
 otherwise triage it.*

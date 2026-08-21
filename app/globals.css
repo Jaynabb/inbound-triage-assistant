@@ -358,6 +358,27 @@ section + section { margin-top: 42px; }
 }
 .row.p-high .rid { color: var(--negative-ink-2); }
 
+/* How it arrived. Quiet — it's context for the reader, not a decision. */
+.chan {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 1px 5px;
+  white-space: nowrap;
+}
+.row.p-high .chan { color: var(--negative-ink-2); border-color: var(--negative-rule); }
+
+/* The two that aren't email get a touch more presence, because they're the
+   ones that change what you do — and the ones with no subject line. */
+.chan-voicemail-transcript,
+.chan-linkedin { color: var(--ink-2); border-color: var(--rule-strong); }
+.row.p-high .chan-voicemail-transcript,
+.row.p-high .chan-linkedin { color: var(--negative-ink); border-color: var(--negative-ink-2); }
+
 .sender { font-weight: 620; letter-spacing: -0.005em; }
 
 .org, .subject { font-size: 13.5px; color: var(--ink-2); }

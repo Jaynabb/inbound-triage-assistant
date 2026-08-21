@@ -50,6 +50,23 @@ const BANDS: Array<{ key: Priority; title: string; short: string }> = [
 
 type BandKey = Priority | "inert";
 
+/**
+ * Not every message is an email. The queue also carries web-form submissions,
+ * LinkedIn messages and transcribed voicemails, and the channel changes what
+ * you actually do — you call a voicemail back, you answer a LinkedIn message
+ * on LinkedIn.
+ *
+ * It also explains the missing fields. Voicemails have no subject line, and
+ * neither do most web forms. That isn't a sender being terse, it's a channel
+ * that doesn't have the field — which is exactly why the pre-flight filter
+ * reads the body and nothing else.
+ */
+const CHANNEL_LABELS: Record<string, string> = {
+  email: "email",
+  "web-form": "web form",
+  linkedin: "linkedin",
+  "voicemail-transcript": "voicemail",
+};
 
 export default function TriageBoard({ items }: { items: InboundItem[] }) {
   const [results, setResults] = useState<Record<string, TriagedItem> | null>(null);
@@ -255,6 +272,13 @@ function Row({ item, triaged }: { item: InboundItem; triaged: TriagedItem }) {
       <div className="row-head">
         <span className="who">
           <span className="rid">{item.id}</span>
+          {/* How it arrived changes how you answer it — you call a voicemail
+              back, you reply to a LinkedIn message on LinkedIn. It also
+              explains missing fields: voicemails and most web forms have no
+              subject line, which is why the filter never looks at one. */}
+          <span className={`chan chan-${item.channel}`}>
+            {CHANNEL_LABELS[item.channel] ?? item.channel}
+          </span>
           <span className="sender">{item.from_name || "Unsigned"}</span>
           {item.from_org && !item.from_org.startsWith("(") && (
             <span className="org">{item.from_org}</span>

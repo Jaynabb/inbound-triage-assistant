@@ -200,15 +200,24 @@ misses it.
 I stop those two before the API call because sending them would cost money for
 no reason. With 13 messages that's nothing. At 10,000 a day it adds up.
 
-The important part is what the filter is allowed to look at. `inb-005` is also
-missing things — no subject, no company — but it's the most urgent message in
-the inbox. He's an existing client, he's angry about a fee, and he wants a call
-back today. He's a customer that's angry, and the last thing on his mind is
-adding a subject line. So a filter that throws out messages with missing fields
-would end up throwing away the angriest customers.
+The important part is what the filter is allowed to look at, and the case that
+settles it is `inb-005`.
+
+He has no subject line and he's the most urgent message in the inbox — an
+existing client, angry about a fee, asking for a callback today. But the reason
+he has no subject isn't that he was in a hurry. **It's a voicemail transcript,
+and voicemails don't have subject lines.** Neither do most web forms —
+`inb-010` is a web-form submission and it has no subject either.
+
+So a filter keyed on missing fields wouldn't just drop one unlucky message. It
+would drop **every voicemail this firm ever receives**, structurally, forever —
+including the client who was angry enough to pick up the phone instead of
+writing. The queue isn't all email: 8 of these 13 are, and the rest come in by
+web form, LinkedIn and voicemail.
 
 That's why the filter only looks at the body. Not the subject, not the sender.
-A missing subject tells you nothing. An empty body tells you everything.
+A missing subject tells you which channel it came from. An empty body tells you
+there's nothing to read.
 
 There's no minimum length, and that was a bug I caught late. I originally had
 "blank" mean fewer than 15 characters, which sounds reasonable until you notice
