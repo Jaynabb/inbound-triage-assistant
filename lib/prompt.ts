@@ -64,6 +64,7 @@ Example C — "Following up on my last email about your open roles — are you h
 - from_org values like "(individual)" and "(unknown)" are placeholders, NOT company names. Never treat them as an organisation, and never let "(individual)" push you toward or away from any category.
 - An empty subject or a missing sender name is normal and means nothing on its own. Judge intent from the body.
 - next_action must be one concrete step a person can take today (e.g. "Send Q3 statement to Dana by Thursday"), not a restatement of the message.
+- **next_action must fit the channel it arrived on.** A voicemail is answered by calling the person back, not by replying to it. A LinkedIn message is answered on LinkedIn. A web form is inbound only — you never reply "via the form"; the form captured their contact details, so the response goes by email or phone. Look at the channel field and make the step something the reader can actually do.
 - summary is one line. Do not exceed 200 characters.
 
 Call the triage tool exactly once with your result.`;

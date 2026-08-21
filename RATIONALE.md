@@ -231,6 +231,25 @@ That's why the filter only looks at the body. Not the subject, not the sender.
 A missing subject tells you which channel it came from. An empty body tells you
 there's nothing to read.
 
+The channel earns its place downstream too: `next_action` has to fit it. You
+answer a voicemail by calling the person back, not by replying to it. You answer
+a LinkedIn message on LinkedIn. A web form is inbound only — you can't reply
+through a contact form, but the form captured their details, so the response
+goes by email or phone. The model gets the channel and is told to use it: Bob's
+action reads "call Bob back", Priya's reads "reply on LinkedIn", and Jordan's
+reads "email Jordan at the address provided".
+
+My first attempt at that instruction said a web form "has no reply address, so
+say where the response should go", and the model duly suggested replying *via
+the web form* — which isn't a thing. The instruction was wrong, not the model.
+
+I stopped there deliberately. The obvious next step is buttons — reply, respond,
+schedule a callback — and that turns a triage board into a mail client: sending
+mail, a calendar integration, knowing who's logged in, handling a send that
+fails. Auth, integrations and multi-user are all explicitly out of scope in the
+brief. The tool's job is to say what to do next; in production the n8n workflow
+is what would do it.
+
 There's no minimum length, and that was a bug I caught late. I originally had
 "blank" mean fewer than 15 characters, which sounds reasonable until you notice
 that a client replying **"ok"** is two characters. That message would have been
