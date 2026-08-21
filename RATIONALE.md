@@ -12,9 +12,14 @@ A partnership isn't a vendor. Vendor means money going out. A partnership is
 the opposite, money coming in. If you file `inb-007` under vendor you're
 telling whoever reads the queue the opposite of what's true.
 
-I added `unclear` because of Sam Cho (`inb-009`). That email could easily be a
-real follow up about something he already talked to the firm about. Rather than
-guess, I'd rather send it to a human and let them connect the dots.
+I added `needs_human` because of Sam Cho (`inb-009`). That email could easily be
+a real follow up about something he already talked to the firm about. Rather
+than guess, I'd rather send it to a human and let them connect the dots.
+
+I called it `unclear` at first and renamed it. The row was showing "needs a
+human" and "unclear" next to each other — two labels for one thing — and naming
+the category for what to *do* is more useful than naming it for how the message
+reads.
 
 Priority comes down to one question: **what breaks if this waits?**
 
@@ -279,8 +284,8 @@ sender's email against that list and it's a fact, not a guess. Use the model for
 judgment — intent, urgency, tone. Use the database for facts.
 
 The same thing applies to `inb-009`. Sam Cho says "just following up on our
-conversation" and nothing else, and the model correctly calls it `unclear` at
-35% confidence, because from that text alone it genuinely can't be known. But
+conversation" and nothing else, and the model correctly calls it `needs_human`
+at 35% confidence, because from that text alone it genuinely can't be known. But
 that isn't the model failing. The information isn't missing from the world, it's
 missing from the message. Once n8n is triggering this on arrival it can attach
 the previous thread, and there's nothing left to guess about.
