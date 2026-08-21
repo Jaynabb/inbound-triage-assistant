@@ -2,8 +2,10 @@
 
 ## a. Data & taxonomy
 
-The brief suggested four categories. I added three, because three messages
-didn't fit.
+The brief suggested four categories — prospect, existing client, vendor, spam.
+I added three, because three messages didn't fit, so there are seven:
+`prospect`, `existing_client`, `vendor`, `partner`, `recruiter`, `spam`,
+`needs_human`.
 
 A recruiter isn't spam. They're not selling anything and they're not buying
 anything, so they don't belong with a vendor or a newsletter either.
@@ -46,10 +48,13 @@ the 2-day band is now someone waiting for an answer, and everything in the
 3-day band is unsolicited outreach with nobody at the firm waiting. Before the
 change, a real prospect was filed alongside a vendor pitch and a newsletter.
 
-I started with a three-part definition — deadline inside 72 hours, or an
-escalation, or an at-risk relationship — and it gave the right answers but was
-awkward to explain. "What breaks if this waits" produces the identical result on
-all 11 messages and is one sentence instead of three clauses.
+Some history on how the rule got to one sentence. I started with a three-part
+definition — a deadline inside 72 hours, or an escalation, or an at-risk
+relationship. It gave the right answers and took three clauses to say. When I
+swapped it for "what breaks if this waits" I re-ran the eval and every message
+landed in the same band, so it was a restatement rather than a redesign.
+(Alicia moved later, and for a different reason — the sender rule above, not
+this one.)
 
 **On screen the bands are service standards, not moods.** Handle today, within
 2 business days, within 3 business days. "Can wait" describes a feeling and
@@ -167,12 +172,14 @@ logic is the benchmark and the model gets graded against it, instead of the
 other way around. Doing it in that order also means I can't be talked into
 agreeing with the model after I see its answers.
 
-It made the same mistake on `inb-013` — a referral from an existing client, high
-value, no deadline, also marked high. Same direction both times. It never pushed
-a low value message up.
+It made the same mistake on `inb-013` — Nathan, referred by an existing client,
+no deadline, also marked high. Same direction both times: the two messages
+carrying the most money were the two it pushed up. It never made the reverse
+error, so this was a consistent bias rather than a random miss. The model was
+treating "worth a lot" and "urgent" as the same axis.
 
-The fix was adding examples to the prompt showing the difference between value
-and urgency. I did not use `inb-001` or `inb-013` as those examples. If the
+The fix was adding examples to the prompt showing that a large sum doesn't touch
+priority. I did not use `inb-001` or `inb-013` as those examples. If the
 failing message is in the prompt, the answer is just part of the prompt rather
 than something the model had to figure out. Calculation versus regurgitation.
 Using made up examples meant that when it got `inb-001` right after, it was
@@ -260,9 +267,24 @@ If the tool runs at 8am and Bob sends his angry message at 9am, nobody sees it
 until the next morning. The one message that was actually time sensitive is the
 one the system is slowest on. That's backwards.
 
-The fix is to stop batching and trigger on arrival instead. n8n watches the
-inbox and fires the triage the moment a message lands, instead of a clock firing
-it once a day. Then Bob is flagged high within seconds of writing in.
+The fix is to stop batching and trigger on arrival instead, so a clock never
+decides when anything gets looked at. Then Bob is flagged within seconds of
+calling in.
+
+That means several triggers, not one, because the queue isn't all email. Of
+these 13, eight are email, three are web-form submissions, one is LinkedIn and
+one is a transcribed voicemail. n8n *watches* a mailbox, but it *receives* a web
+form — the form posts straight to a webhook. Voicemail is two hops: the phone
+system records it, a transcription service turns it into text, and that posts to
+n8n. LinkedIn is the awkward one, with no first-party trigger at all; it needs a
+third-party bridge or someone forwarding manually, and I'd flag that as a
+decision rather than pretend it's solved.
+
+What makes it one system instead of four is normalising every source into the
+same shape before anything downstream sees it — id, received_at, channel,
+from_name, from_org, subject, body. The filter and the model never learn where a
+message came from. `data/inbound.json` is already that shape, which is why the
+tool handles four channels today without a line of channel-specific code.
 
 Only high priority gets pushed out to a person. If everything pushes, nothing is
 a signal and people start ignoring it.
