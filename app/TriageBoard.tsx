@@ -25,7 +25,6 @@ interface Meta {
  * messages stay on screen; hiding them would hide the behaviour worth seeing.
  */
 
-/** Band headings are written from the reader's side, not the schema's. */
 /**
  * Headings are the service standard, not a mood.
  *
@@ -50,6 +49,7 @@ const BANDS: Array<{ key: Priority; title: string; short: string }> = [
 ];
 
 type BandKey = Priority | "inert";
+
 
 export default function TriageBoard({ items }: { items: InboundItem[] }) {
   const [results, setResults] = useState<Record<string, TriagedItem> | null>(null);
@@ -238,7 +238,15 @@ function Row({ item, triaged }: { item: InboundItem; triaged: TriagedItem }) {
   const inert =
     triaged.status === "skipped_malformed" || triaged.status === "error";
 
-  const cls = ["row", inert ? "is-inert" : "", r && !inert ? `p-${r.priority}` : ""]
+  // Two different kinds of "look at me", so two different signals: urgency owns
+  // the ink (high rows print in the negative), and anything the model couldn't
+  // decide owns the brass. They never compete for the same treatment.
+  const cls = [
+    "row",
+    inert ? "is-inert" : "",
+    r && !inert ? `p-${r.priority}` : "",
+    triaged.status === "review" ? "is-review" : "",
+  ]
     .filter(Boolean)
     .join(" ");
 
@@ -251,19 +259,30 @@ function Row({ item, triaged }: { item: InboundItem; triaged: TriagedItem }) {
           {item.from_org && !item.from_org.startsWith("(") && (
             <span className="org">{item.from_org}</span>
           )}
-          {!item.subject && <span className="subject is-absent">no subject</span>}
+          {/* Always rendered. Showing "no subject" while never showing a
+              subject flags the absence of a field the reader has never seen —
+              and the absence only reads as unusual next to rows that have one. */}
+          <span className={`subject${item.subject ? "" : " is-absent"}`}>
+            {item.subject || "no subject"}
+          </span>
         </span>
 
         {/* What it is, right-aligned. Identity belongs beside the sender
             rather than in a footer. */}
         {r && (
           <span className="what">
+            {/* Marks the row itself, so it still reads as urgent when you've
+                scrolled past the heading or filtered to a single band. */}
+            {r.priority === "high" && <span className="today">today</span>}
+
             {/* The flag only appears when the category doesn't already say it —
                 low confidence on a category the model WAS willing to pick. */}
             {triaged.status === "review" && r.category !== "needs_human" && (
               <span className="flag">needs a human</span>
             )}
-            <span className={`tag${r.category === "needs_human" ? " flag" : ""}`}>
+            <span
+              className={`tag${r.category === "needs_human" ? " tag-review" : ""}`}
+            >
               {r.category.replace("_", " ")}
             </span>
           </span>

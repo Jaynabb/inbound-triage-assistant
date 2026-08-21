@@ -28,6 +28,11 @@
   --brass-ink: #6d4f10;
   --brass-wash: #f6efdd;
 
+  /* Reinforcement only. The black row already carries the urgency signal, so
+     this never has to be seen to work. */
+  --urgent: #d0353a;
+  --urgent-ink: #ffffff;
+
   --negative-bg: #141b25;
   --negative-ink: #f3f5f8;
   --negative-ink-2: #a8b3c1;
@@ -58,6 +63,9 @@
     --brass: #6b5829;
     --brass-ink: #a98c4d;
     --brass-wash: transparent;
+
+    --urgent: #e05257;
+    --urgent-ink: #0b0f15;
 
     --negative-bg: #e9edf2;
     --negative-ink: #0b0f15;
@@ -398,15 +406,49 @@ section + section { margin-top: 42px; }
 
 
 
+/* Marks a high row as urgent even out of context — filtered, or scrolled past
+   its heading. Reversed out of the negative background so it reads as a stamp. */
+.today {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--urgent-ink);
+  background: var(--urgent);
+  border-radius: 2px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+
+/* ANYTHING THE MODEL COULDN'T DECIDE WEARS BRASS.
+   Urgency owns the ink, so this needs its own channel — a black row and a
+   brass row are asking for two different things from the reader. */
+.row.is-review {
+  border-left-color: var(--brass);
+  border-left-width: 4px;
+}
+.row.p-high.is-review { border-left-color: var(--negative-brass); }
+
+.tag-review,
 .flag {
   font-family: var(--mono);
   font-size: 10.5px;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--ink);
-  border-bottom: 1.5px solid var(--ink);
+  color: var(--brass-ink);
+  background: var(--brass-wash);
+  border: 1px solid var(--brass);
+  border-radius: 2px;
+  padding: 2px 7px;
+  white-space: nowrap;
 }
-.row.p-high .flag { color: var(--negative-ink); border-bottom-color: var(--negative-ink); }
+.row.p-high .tag-review,
+.row.p-high .flag {
+  color: var(--negative-brass);
+  background: transparent;
+  border-color: var(--negative-brass);
+}
 
 /* why / reasoning */
 
@@ -419,6 +461,31 @@ section + section { margin-top: 42px; }
 }
 
 .why { flex: 0 0 auto; }
+/* Marks a high row as urgent even out of context — filtered, or scrolled past
+   its heading. Reversed out of the negative background so it reads as a stamp. */
+.today {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--urgent-ink);
+  background: var(--urgent);
+  border-radius: 2px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+
+/* ANYTHING THE MODEL COULDN'T DECIDE WEARS BRASS.
+   Urgency owns the ink, so this needs its own channel — a black row and a
+   brass row are asking for two different things from the reader. */
+.row.is-review {
+  border-left-color: var(--brass);
+  border-left-width: 4px;
+}
+.row.p-high.is-review { border-left-color: var(--negative-brass); }
+
+.tag-review,
 
 /* Once opened, take the whole row so the panel isn't squeezed between the
    other toggles. flex-wrap drops it onto its own line. */
