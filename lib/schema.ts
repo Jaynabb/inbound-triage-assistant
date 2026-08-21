@@ -62,6 +62,32 @@ export const CATEGORY_DEFINITIONS: Record<Category, string> = {
 export const PRIORITIES = ["high", "medium", "low"] as const;
 export type Priority = (typeof PRIORITIES)[number];
 
+/**
+ * What the MODEL is told. Only the test — no service standards.
+ *
+ * Each band also carries a business-day commitment (handle today / within 2
+ * days / within 3 days), and those live in the UI (`BANDS` in TriageBoard.tsx)
+ * rather than here. That split is deliberate and it was measured, not assumed.
+ *
+ * I first put the standards in these strings, which meant the model read them.
+ * The eval dropped from 11/11 to 10/11 on priority: inb-013 (Nathan, referred
+ * by an existing client) moved from medium to high, and the model's own
+ * reasoning gave it away —
+ *
+ *     "Referrals from existing clients are high-priority because they
+ *      represent trusted relationships... NOTHING BREAKS TODAY, but the
+ *      prospect is actively ready to engage and Dana's credibility is on
+ *      the line if we delay."
+ *
+ * It applied the test, got the right answer, and then overrode itself. Framing
+ * the bands as service standards invited it to reason about how attentive to
+ * be rather than about what breaks — and the value-into-urgency leak came back
+ * in through that door.
+ *
+ * So: the model gets the test. The operator gets the commitment. The test
+ * decides which band a message lands in; the commitment is what that band
+ * promises once it's there. Different audiences, different information.
+ */
 export const PRIORITY_DEFINITIONS: Record<Priority, string> = {
   high: "Something breaks if this waits — a deadline passes, a complaint escalates, or a client relationship degrades.",
   medium:

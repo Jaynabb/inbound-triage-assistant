@@ -28,12 +28,12 @@
     "inb-005": {
       "category": "existing_client",
       "priority": "high",
-      "why": "Existing client, disputed fee, explicit same-day callback request. Escalation and an at-risk relationship. Note: this message has NO subject line — the pre-filter must not penalise that."
+      "why": "Existing client, disputed fee, explicit same-day callback request. Escalation and an at-risk relationship. Note: this message has NO subject line \u2014 the pre-filter must not penalise that."
     },
     "inb-006": {
       "category": "prospect",
-      "priority": "low",
-      "why": "Genuine prospect, but she states 'no rush at all' herself. Nothing breaks if this waits, and by her own account nobody is waiting on us."
+      "priority": "medium",
+      "why": "She says 'no rush at all', but she also asks two direct questions \u2014 what's the minimum, and how do fees work. She is waiting on an answer. The sender does not set our service standard: a prospect telling us not to rush doesn't dictate how we treat prospects. Nothing breaks, but someone is waiting, so medium."
     },
     "inb-007": {
       "category": "partner",
@@ -54,13 +54,13 @@
       "category": null,
       "priority": null,
       "expected_status": "skipped_malformed",
-      "why": "Body is a single '.' — no readable content. Should never reach the model."
+      "why": "Body is a single '.' \u2014 no readable content. Should never reach the model."
     },
     "inb-011": {
       "category": null,
       "priority": null,
       "expected_status": "skipped_malformed",
-      "why": "Null bytes, replacement characters, MIME boundary fragments. No readable content after stripping transport noise."
+      "why": "Broken — contains characters a person can't type (null bytes, replacement characters). Should never reach the model."
     },
     "inb-012": {
       "category": "existing_client",
@@ -70,7 +70,7 @@
     "inb-013": {
       "category": "prospect",
       "priority": "medium",
-      "why": "Referred by an existing client, so high value and not unsolicited — but 'soon' is not a deadline. Structurally identical to inb-007."
+      "why": "Referred by an existing client, so high value and not unsolicited \u2014 but 'soon' is not a deadline. Structurally identical to inb-007."
     }
   }
 }

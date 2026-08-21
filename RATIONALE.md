@@ -28,10 +28,50 @@ in `inb-005` is high because he's already angry and gets angrier by the hour.
 Marcus in `inb-003` would love a reply next week, but nothing breaks for the
 firm if he never gets one, so he's low.
 
+**The sender doesn't set the priority, in either direction.** Marcus wanting a
+reply this week doesn't make him high. And Alicia in `inb-006` opening with "no
+rush at all" doesn't make her low — she still asked what the minimum is and how
+fees work, so she's waiting on an answer. A prospect telling us not to rush
+doesn't get to dictate how we treat prospects; the firm sets that standard, not
+the person writing in.
+
+I had her at low at first, on the grounds that she'd said so herself. That was
+wrong, and fixing it made the bands coherent for the first time: everything in
+the 2-day band is now someone waiting for an answer, and everything in the
+3-day band is unsolicited outreach with nobody at the firm waiting. Before the
+change, a real prospect was filed alongside a vendor pitch and a newsletter.
+
 I started with a three-part definition — deadline inside 72 hours, or an
 escalation, or an at-risk relationship — and it gave the right answers but was
 awkward to explain. "What breaks if this waits" produces the identical result on
 all 11 messages and is one sentence instead of three clauses.
+
+**On screen the bands are service standards, not moods.** Handle today, within
+2 business days, within 3 business days. "Can wait" describes a feeling and
+promises nothing, which made the biggest opportunity in the queue look like it
+was being shrugged at. A commitment is a better thing to show. The word is
+"handle" rather than "respond" because the bottom band holds both a real
+prospect who deserves an answer and a newsletter that needs no reply ever —
+archiving is handling, so one verb covers the band without special cases.
+
+**And the standards are deliberately not in the model's rulebook.** I put them
+there first and the eval caught it: priority dropped from 11/11 to 10/11, with
+`inb-013` — Nathan, referred by an existing client — moving from medium to
+high. The model's own reasoning showed exactly what went wrong:
+
+> "Referrals from existing clients are high-priority because they represent
+> trusted relationships... **nothing breaks today**, but the prospect is
+> actively ready to engage and Dana's credibility is on the line if we delay."
+
+It applied my test, got the right answer, and then talked itself out of it.
+Framing the bands as service standards invited it to reason about how attentive
+to be instead of about what breaks, and the value-into-urgency problem came
+back in through that door. Moving the standards to the UI put it back to 11/11.
+
+So the model gets the test and the operator gets the commitment. The test
+decides which band a message lands in; the commitment is what that band
+promises once it's there. Two different audiences needing two different things,
+and I only found that out because the eval was there to tell me.
 
 Notice the question says nothing about money, and that's the point. `inb-001` is
 $8M with no deadline — nothing breaks if Gregory waits until Thursday, so he's

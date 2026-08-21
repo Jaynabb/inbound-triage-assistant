@@ -41,6 +41,8 @@ The question says nothing about money, and that is deliberate. A $10M prospect w
 
 It cuts the other way too. A vendor may want a reply this week, but nothing breaks for the firm if he never gets one. The sender wanting speed is not the firm having something at stake.
 
+**The sender does not set the priority, in either direction.** Someone writing "urgent!" does not make it high, and someone writing "no rush at all" does not make it low. A prospect who asks a real question is waiting for an answer whether or not they were polite about the timing — the firm decides how it treats its prospects, not the person writing in. Ask only what breaks, and who is waiting on us.
+
 ## Worked examples
 
 These illustrate the rule. They are not messages in your queue.

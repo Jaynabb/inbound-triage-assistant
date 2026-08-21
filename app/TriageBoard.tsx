@@ -26,10 +26,27 @@ interface Meta {
  */
 
 /** Band headings are written from the reader's side, not the schema's. */
+/**
+ * Headings are the service standard, not a mood.
+ *
+ * "Can wait" describes a feeling and promises nothing — which made the biggest
+ * opportunity in the queue look like it was being shrugged at. "Within 2
+ * business days" is a commitment. Same message, same band, completely
+ * different thing to show a client.
+ *
+ * These standards live HERE and not in PRIORITY_DEFINITIONS, because the model
+ * reads those and shouldn't read these. Putting the standards in the model's
+ * rulebook cost a point on the eval — see the note in lib/schema.ts. The model
+ * decides what breaks; the operator is told what we've promised.
+ *
+ * "Handle", not "respond": the bottom band holds both a real prospect who
+ * deserves an answer and a newsletter that needs no reply ever. Archiving is
+ * handling, so one verb covers the whole band without special cases.
+ */
 const BANDS: Array<{ key: Priority; title: string; short: string }> = [
-  { key: "high", title: "Needs a response today", short: "Today" },
-  { key: "medium", title: "Can wait", short: "Can wait" },
-  { key: "low", title: "No rush", short: "No rush" },
+  { key: "high", title: "Handle today", short: "Today" },
+  { key: "medium", title: "Within 2 business days", short: "2 days" },
+  { key: "low", title: "Within 3 business days", short: "3 days" },
 ];
 
 type BandKey = Priority | "inert";

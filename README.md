@@ -66,6 +66,24 @@ $8M prospect with no deadline is medium, because nothing breaks if he waits. The
 amount goes in the summary where a reader can see it; it just doesn't move him
 up the queue.
 
+**The sender doesn't set the priority, in either direction.** A vendor wanting
+a reply this week doesn't make him high, and a prospect opening with "no rush at
+all" doesn't make her low — she still asked a question and is waiting on an
+answer. The firm sets its service standard, not the person writing in.
+
+**On screen those bands are service standards** — handle today, within 2
+business days, within 3 business days. "Can wait" promises nothing; a
+commitment is a better thing to show. "Handle" rather than "respond", because
+archiving a newsletter is handling it.
+
+**The standards are not in the model's prompt, and that was measured.** With
+them in, priority dropped to 10/11 — `inb-013` moved to high, and the model's
+reasoning said "nothing breaks today" and marked it high anyway, on the grounds
+that a referral deserves attentive service. Framing bands as standards invited
+service-quality reasoning instead of breakage reasoning. Moved them to the UI
+and it went back to 11/11. **The model gets the test; the operator gets the
+commitment.**
+
 **I built a separate value field and removed it.** The brief asks for four
 things and value was a fifth I'd added. Once priority was one question, the
 second axis was answering something nobody asked, and "high priority, low value"
