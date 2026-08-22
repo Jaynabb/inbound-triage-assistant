@@ -78,8 +78,8 @@ low — she still asked a question and is waiting on an answer. The firm sets it
 service standard, not the person writing in.
 
 **On screen those bands are service standards** — handle today, within 2
-business days, within 3 business days. "Can wait" promises nothing; a
-commitment is a better thing to show.
+business days, within 3 business days. The band tells the reader what the firm
+has committed to, not how urgent the message felt to whoever wrote it.
 
 **The standards live in the UI, not in the model's prompt.** The model is asked
 what breaks; the operator is shown what the firm commits to. Framing the bands

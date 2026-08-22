@@ -49,12 +49,9 @@ outreach with nobody at the firm waiting. A real prospect never ends up filed
 alongside a vendor pitch and a newsletter.
 
 **On screen the bands are service standards, not moods.** Handle today, within
-2 business days, within 3 business days. "Can wait" describes a feeling and
-promises nothing, which made the biggest opportunity in the queue look like it
-was being shrugged at. A commitment is a better thing to show. The word is
-"handle" rather than "respond" because the bottom band holds both a real
-prospect who deserves an answer and a newsletter that needs no reply ever —
-archiving is handling, so one verb covers the band without special cases.
+2 business days, within 3 business days. The band tells whoever reads the queue
+what the firm has committed to, not how urgent the message felt to whoever
+wrote it.
 
 **And the standards are deliberately not in the model's rulebook.** I put them
 there first and the eval caught it: priority dropped from 11/11 to 10/11, with
