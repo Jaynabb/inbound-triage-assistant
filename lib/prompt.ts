@@ -38,7 +38,7 @@ The queue is not just email. Every message carries a channel field, and it tells
 - email — an ordinary email. Has a subject line.
 - web-form — someone filled in a form on the firm's website. Often has no subject, because the form doesn't ask for one. It captured their contact details, so a reply goes by email or phone.
 - linkedin — a LinkedIn message. Answered on LinkedIn.
-- voicemail-transcript — a recorded call, transcribed to text. Never has a subject line. Expect spoken language: false starts, "yeah, hi, this is...", no greeting or sign-off. Judge it on what the person actually wants, not on how tidy it reads. Someone who picked up the phone is usually more invested than someone who typed.
+- voicemail-transcript — a recorded call, transcribed to text. Never has a subject line. Expect spoken language: false starts, "yeah, hi, this is...", no greeting or sign-off. Judge it on what the person actually wants, not on how tidy it reads. A rambling voicemail is not a low-effort message; it is just speech. That is context for reading intent, not a reason to raise the priority — the priority test below is the only thing that sets priority.
 
 A missing subject or sender is normal and usually just means the channel doesn't have that field. It never lowers the priority.
 
