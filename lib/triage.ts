@@ -71,7 +71,7 @@ function getClient(): Anthropic {
  * Cosmetic fields are repaired, not rejected.
  *
  * Tiered by consequence:
- *   - category / priority / value_signal DRIVE ROUTING. A wrong value sends a
+ *   - category / priority DRIVE ROUTING. A wrong value sends a
  *     client to the wrong queue, so these hard-fail and trigger a retry.
  *   - summary / next_action are ONE-LINE DISPLAY fields, rendered inline and
  *     always visible. The brief asks for a one-line summary, so the limit comes

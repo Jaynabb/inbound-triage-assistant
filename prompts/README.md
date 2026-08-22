@@ -86,12 +86,12 @@ guarantee the values make sense: a `summary` meant to be one line can come back
 as four and still be perfectly valid JSON, and `confidence` has to actually sit
 between 0 and 1.
 
-*Evidence it isn't redundant, from earlier in the build:* `reasoning` used to
-carry a 300-character cap, and 3 of 11 calls returned perfectly-shaped JSON that
-overran it. Tool use passed all three; only zod caught them. That cap has since
-been removed — it was a constraint I'd invented and couldn't justify — so the
-example is history rather than current behaviour, but it's the clearest
-demonstration that layers 1 and 2 do different jobs.
+*Evidence it isn't redundant:* put a 300-character limit on `reasoning` and 3 of
+11 calls return perfectly-shaped JSON that overruns it. Tool use passes all
+three; only zod catches them. Shape and content are different questions, and
+that is the clearest demonstration that layers 1 and 2 do different jobs.
+`reasoning` ships with no limit — see the tier below — but the measurement is
+what shows the second layer earns its place.
 
 **3. Tiered repair.** Not every defect deserves the same response:
 
