@@ -220,11 +220,9 @@ fails. Auth, integrations and multi-user are all explicitly out of scope in the
 brief. The tool's job is to say what to do next; in production the n8n workflow
 is what would do it.
 
-There's no minimum length, and that was a bug I caught late. I originally had
-"blank" mean fewer than 15 characters, which sounds reasonable until you notice
-that a client replying **"ok"** is two characters. That message would have been
-parked and nobody would ever have known — which is the worst thing this system
-can do.
+There's no minimum length. A client replying **"ok"** is two characters, and any
+threshold that treats short as empty parks that message with nobody ever finding
+out — which is the worst thing this system can do.
 
 So blank means no letters or numbers at all. There's no number to tune and no
 threshold to defend. `scripts/verify-signal.mts` asserts it both ways: `"ok"`,
