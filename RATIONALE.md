@@ -193,6 +193,14 @@ doesn't tell me the system is right. Before I relied on it I'd want a few
 hundred labeled messages, and I'd track priority accuracy over time instead of
 quoting one number.
 
+**And the score isn't perfectly stable between runs.** I ran the eval five times
+back to back near the end: four came back 24/24 and one came back 23/24. Same
+prompt, same messages, `temperature: 0`. Temperature 0 makes a model much more
+consistent but it doesn't make it deterministic, so a single score is a sample
+too — not a fixed property of the system. That's another reason a number off 11
+messages shouldn't be leaned on, and another argument for tracking accuracy as a
+running metric in production rather than quoting a run.
+
 ## d. Edge cases
 
 The filter is one rule: **if a message is broken or blank, park it. Otherwise
