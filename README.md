@@ -140,7 +140,35 @@ doors, and each one gets into n8n a different way:
 | **email** | n8n **watches** the mailbox and polls for new messages | Gmail / Outlook / IMAP trigger | Native. The mailbox stays the mailbox; n8n just reads it. |
 | **web form** | n8n **is** the destination — the form posts straight to it | Webhook trigger | Native. Point the form's action at the webhook URL. |
 | **voicemail** | phone system records → a transcription service turns it to text → that posts to n8n | Webhook trigger, two services in front | n8n never touches the call. It receives the transcript. |
-| **LinkedIn** | a third-party bridge posts to n8n | Webhook trigger, paid bridge | **The awkward one.** No first-party LinkedIn trigger exists. Needs Unipile / HeyReach / similar, or someone forwarding manually. Worth a decision rather than an assumption. |
+| **LinkedIn** | a third-party bridge reads the LinkedIn inbox and posts to n8n | Webhook trigger + paid bridge | **The awkward one — see below.** |
+
+### LinkedIn needs a paid bridge, and that's a decision not a detail
+
+Three of those four are native n8n nodes. LinkedIn isn't: **there is no
+first-party trigger for receiving LinkedIn messages**, in n8n or anywhere else.
+LinkedIn's official API doesn't expose the messaging inbox to third parties, so
+any tool that reads it is doing so through an unofficial route.
+
+The realistic options:
+
+| option | what it is | cost | notes |
+|---|---|---|---|
+| **Unipile** | Messaging API covering LinkedIn, email and calendar. Reads and sends from the user's real account. | ~€5 per connected account/month, €49/month minimum | Has first-class n8n documentation and webhook setup guides — the least friction of the three. |
+| **HeyReach** | LinkedIn outreach platform with an API, webhooks and inbox/reply handling on every paid tier | subscription, higher than Unipile | Heavier than needed if all you want is inbound. |
+| **Manual forward** | someone pastes the message into the web form or forwards it to the triage mailbox | free | Zero integration risk. Fine at Northwind's volume — one LinkedIn message in thirteen. |
+
+**What I'd actually recommend:** start with the manual forward, and only pay for
+a bridge once LinkedIn volume justifies it. One message in thirteen doesn't.
+
+Two things worth saying plainly rather than burying:
+
+- **These tools carry account risk.** They automate a platform that doesn't want
+  to be automated, and LinkedIn does restrict accounts for it. That's a risk the
+  firm takes on, not a technical detail — worth a conversation before anyone
+  signs up.
+- **It's the one channel with an ongoing cost and an external dependency.** The
+  other three are nodes n8n already ships. If the bridge goes down or changes
+  its terms, that channel stops.
 
 Then everything converges:
 

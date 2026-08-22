@@ -68,6 +68,21 @@ const CHANNEL_LABELS: Record<string, string> = {
   "voicemail-transcript": "voicemail",
 };
 
+/**
+ * How each channel would actually reach the triage in production. Shown on
+ * hover rather than on the row — it's reference for whoever wires it up, not
+ * something an operator working the queue needs to read.
+ */
+const CHANNEL_INTAKE: Record<string, string> = {
+  email: "n8n watches the mailbox (Gmail / Outlook / IMAP trigger). Native node.",
+  "web-form":
+    "The form posts straight to an n8n webhook. Native node. Inbound only — reply by email or phone, using the details the form captured.",
+  linkedin:
+    "No first-party trigger exists. Needs a paid bridge (Unipile, HeyReach) that reads the LinkedIn inbox and posts to a webhook — or, at this volume, someone forwarding it manually.",
+  "voicemail-transcript":
+    "Phone system records, a transcription service converts it, the transcript posts to an n8n webhook. Never has a subject line; expect spoken language.",
+};
+
 export default function TriageBoard({ items }: { items: InboundItem[] }) {
   const [results, setResults] = useState<Record<string, TriagedItem> | null>(null);
   const [meta, setMeta] = useState<Meta | null>(null);
@@ -276,7 +291,10 @@ function Row({ item, triaged }: { item: InboundItem; triaged: TriagedItem }) {
               back, you reply to a LinkedIn message on LinkedIn. It also
               explains missing fields: voicemails and most web forms have no
               subject line, which is why the filter never looks at one. */}
-          <span className={`chan chan-${item.channel}`}>
+          <span
+            className={`chan chan-${item.channel}`}
+            title={CHANNEL_INTAKE[item.channel] ?? item.channel}
+          >
             {CHANNEL_LABELS[item.channel] ?? item.channel}
           </span>
           <span className="sender">{item.from_name || "Unsigned"}</span>
