@@ -64,9 +64,13 @@ RATIONALE (a).
 **Priority is one question: what breaks if this waits?** Breaking is concrete —
 a deadline passes, a complaint escalates, or a client relationship degrades.
 Something breaks today is high, nothing breaks but someone's waiting is medium,
-nothing breaks and nobody's waiting is low. The question says nothing about money: an $8M prospect
-with no deadline is medium, because nothing breaks if he waits. The amount goes
-in the summary where a reader can see it; it doesn't move him up the queue.
+nothing breaks and nobody's waiting is low. `inb-005` is the clearest high in
+the queue: an existing client angry enough about a fee to phone instead of
+write, and a client left waiting while he's angry is a client who leaves.
+
+The question says nothing about money: an $8M prospect with no deadline is
+medium, because nothing breaks if he waits. The amount goes in the summary where
+a reader can see it; it doesn't move him up the queue.
 
 **The sender doesn't set the priority, in either direction.** A vendor wanting
 a reply this week isn't high, and a prospect opening with "no rush at all" isn't

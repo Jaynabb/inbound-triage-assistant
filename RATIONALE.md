@@ -18,10 +18,9 @@ I added `needs_human` because of Sam Cho (`inb-009`). That email could easily be
 a real follow up about something he already talked to the firm about. Rather
 than guess, I'd rather send it to a human and let them connect the dots.
 
-I called it `unclear` at first and renamed it. The row was showing "needs a
-human" and "unclear" next to each other — two labels for one thing — and naming
-the category for what to *do* is more useful than naming it for how the message
-reads.
+It's named for what to *do* with the message rather than for how the message
+reads. "Unclear" describes the text and leaves the reader to work out what
+that means for them; `needs_human` says where it goes.
 
 Priority comes down to one question: **what breaks if this waits?**
 
@@ -29,11 +28,13 @@ Priority comes down to one question: **what breaks if this waits?**
 - Nothing breaks, but someone's waiting on us — medium
 - Nothing breaks and nobody's waiting — low
 
-That's the whole rule. Dana in `inb-002` is high because her mortgage lender
-needs the statement by Friday and she misses her deadline if we sit on it. Bob
-in `inb-005` is high because he's already angry and gets angrier by the hour.
-Marcus in `inb-003` would love a reply next week, but nothing breaks for the
-firm if he never gets one, so he's low.
+That's the whole rule, and the test is only useful if you say what actually
+breaks. Dana in `inb-002` is high because her mortgage lender needs the
+statement by Friday — sit on it and she misses her closing. Bob in `inb-005` is
+high because he's an existing client who is angry enough about a fee to pick up
+the phone instead of writing, and a client left waiting while he's angry is a
+client who leaves. Marcus in `inb-003` would love a reply next week, but nothing
+breaks for the firm if he never gets one, so he's low.
 
 **The sender doesn't set the priority, in either direction.** Marcus wanting a
 reply this week doesn't make him high. And Alicia in `inb-006` opening with "no
@@ -42,19 +43,10 @@ fees work, so she's waiting on an answer. A prospect telling us not to rush
 doesn't get to dictate how we treat prospects; the firm sets that standard, not
 the person writing in.
 
-I had her at low at first, on the grounds that she'd said so herself. That was
-wrong, and fixing it made the bands coherent for the first time: everything in
-the 2-day band is now someone waiting for an answer, and everything in the
-3-day band is unsolicited outreach with nobody at the firm waiting. Before the
-change, a real prospect was filed alongside a vendor pitch and a newsletter.
-
-Some history on how the rule got to one sentence. I started with a three-part
-definition — a deadline inside 72 hours, or an escalation, or an at-risk
-relationship. It gave the right answers and took three clauses to say. When I
-swapped it for "what breaks if this waits" I re-ran the eval and every message
-landed in the same band, so it was a restatement rather than a redesign.
-(Alicia moved later, and for a different reason — the sender rule above, not
-this one.)
+That rule is what makes the bands coherent: everything in the 2-day band is
+someone waiting for an answer, and everything in the 3-day band is unsolicited
+outreach with nobody at the firm waiting. A real prospect never ends up filed
+alongside a vendor pitch and a newsletter.
 
 **On screen the bands are service standards, not moods.** Handle today, within
 2 business days, within 3 business days. "Can wait" describes a feeling and
