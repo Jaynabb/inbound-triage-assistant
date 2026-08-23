@@ -49,6 +49,45 @@ this message** button, because choosing from a list of one isn't a choice.
 (`app/api/triage/route.ts`), so the Anthropic client only ever exists in the
 Node process.
 
+## What it does with the 13 messages
+
+In board order — handle today, then within 2 business days, then within 3.
+
+| id | channel | from | category | priority | summary |
+|---|---|---|---|---|---|
+| `inb-002` | web form | Dana Whitfield | existing client | **high** | Existing client Dana Whitfield needs updated portfolio statement by Friday for mortgage lender |
+| `inb-005` | voicemail | Robert Ellison | existing client | **high** | Existing client Bob Ellison disputes a fee on his statement; requests callback today |
+| `inb-001` | email | Gregory Palmer | prospect | **medium** | $8M liquidity event; seeking tax-efficient planning and family office setup |
+| `inb-006` | email | Alicia Tran | prospect | **medium** | Prospect asking about minimum account size and fee structure |
+| `inb-007` | web form | Jordan Massey (Cedar Ridge Wealth) | partner | **medium** | RIA owner exploring referral partnership arrangement |
+| `inb-009` | email | Sam Cho | needs human review | **medium** | Follow-up on prior conversation; next steps unclear |
+| `inb-012` | email | Helen Ortiz | existing client | **medium** | Existing client Helen Ortiz requesting quarterly review scheduling, mornings preferred |
+| `inb-013` | email | Nathan Brooks | prospect | **medium** | Prospect referred by existing client Dana Whitfield; seeking family planning intro call |
+| `inb-003` | email | Marcus Reed (Lumen Analytics) | vendor | **low** | Lumen Analytics pitching portfolio analytics platform; requesting 20-min demo next week |
+| `inb-004` | linkedin | Priya N. (TalentBridge Recruiting) | recruiter | **low** | Recruiter pitching senior role opportunity with their client |
+| `inb-008` | email | unsigned (Market Daily) | spam | **low** | Automated market newsletter from Market Daily |
+| `inb-010` | web form | unsigned | — | **parked** | blank — the message contains no letters or numbers |
+| `inb-011` | email | `=?utf-8?B?` | — | **parked** | broken — the message contains characters that aren't readable text |
+
+The two parked rows never reach the model. The other eleven match the answer key
+in `eval/answer-key.json`, which was written by hand before the model ran — that
+agreement is the 24/24 `scripts/eval.mts` reports.
+
+Four rows are worth reading against each other, because they're where the rules
+actually bite:
+
+- **`inb-005` is high and has no deadline in it.** An existing client angry
+  enough about a fee to phone instead of write. Leave him a day and the firm
+  doesn't have a client.
+- **`inb-001` is $8M and medium.** Gregory set no deadline, so nothing breaks if
+  he waits until Thursday. The money is in his summary, not in his priority.
+- **`inb-006` opens with "no rush at all" and is still medium.** She asked a real
+  question and is waiting on an answer; the sender doesn't set the priority.
+- **`inb-009` is the one the model wouldn't guess at.** Sam Cho's message alone
+  can't say what he wants, and a confident wrong label routes a possible client
+  to the wrong queue. With the sender lookup below, this row wouldn't need a
+  human at all.
+
 ## Design choices and tradeoffs
 
 **Next.js + TypeScript, set up by hand.** There's no generated scaffolding in
