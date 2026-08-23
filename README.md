@@ -51,42 +51,33 @@ Node process.
 
 ## What it does with the 13 messages
 
-In board order — handle today, then within 2 business days, then within 3.
+In board order — handle today, then within 2 business days, then within 3. The
+priority column carries the reason, because a band nobody can justify is a band
+nobody should trust.
 
-| id | channel | from | category | priority | summary |
+| id | channel | from | category | priority — and what breaks | summary |
 |---|---|---|---|---|---|
-| `inb-002` | web form | Dana Whitfield | existing client | **high** | Existing client Dana Whitfield needs updated portfolio statement by Friday for mortgage lender |
-| `inb-005` | voicemail | Robert Ellison | existing client | **high** | Existing client Bob Ellison disputes a fee on his statement; requests callback today |
-| `inb-001` | email | Gregory Palmer | prospect | **medium** | $8M liquidity event; seeking tax-efficient planning and family office setup |
-| `inb-006` | email | Alicia Tran | prospect | **medium** | Prospect asking about minimum account size and fee structure |
-| `inb-007` | web form | Jordan Massey (Cedar Ridge Wealth) | partner | **medium** | RIA owner exploring referral partnership arrangement |
-| `inb-009` | email | Sam Cho | needs human review | **medium** | Follow-up on prior conversation; next steps unclear |
-| `inb-012` | email | Helen Ortiz | existing client | **medium** | Existing client Helen Ortiz requesting quarterly review scheduling, mornings preferred |
-| `inb-013` | email | Nathan Brooks | prospect | **medium** | Prospect referred by existing client Dana Whitfield; seeking family planning intro call |
-| `inb-003` | email | Marcus Reed (Lumen Analytics) | vendor | **low** | Lumen Analytics pitching portfolio analytics platform; requesting 20-min demo next week |
-| `inb-004` | linkedin | Priya N. (TalentBridge Recruiting) | recruiter | **low** | Recruiter pitching senior role opportunity with their client |
-| `inb-008` | email | unsigned (Market Daily) | spam | **low** | Automated market newsletter from Market Daily |
-| `inb-010` | web form | unsigned | — | **parked** | blank — the message contains no letters or numbers |
-| `inb-011` | email | `=?utf-8?B?` | — | **parked** | broken — the message contains characters that aren't readable text |
+| `inb-002` | web form | Dana Whitfield | existing client | **high** — misses her lender's Friday deadline | Existing client Dana Whitfield needs updated portfolio statement by Friday for mortgage lender |
+| `inb-005` | voicemail | Robert Ellison | existing client | **high** — angry client; left a day, the firm loses him | Existing client Bob Ellison disputes a fee on his statement; requests callback today |
+| `inb-001` | email | Gregory Palmer | prospect | **medium** — no deadline; the $8M doesn't move him | $8M liquidity event; seeking tax-efficient planning and family office setup |
+| `inb-006` | email | Alicia Tran | prospect | **medium** — asked a real question, waiting on us | Prospect asking about minimum account size and fee structure |
+| `inb-007` | web form | Jordan Massey (Cedar Ridge Wealth) | partner | **medium** — waiting on a reply, nothing breaks today | RIA owner exploring referral partnership arrangement |
+| `inb-009` | email | Sam Cho | needs human review | **medium** — someone's waiting, but on what is unknown | Follow-up on prior conversation; next steps unclear |
+| `inb-012` | email | Helen Ortiz | existing client | **medium** — client waiting on scheduling, no date named | Existing client Helen Ortiz requesting quarterly review scheduling, mornings preferred |
+| `inb-013` | email | Nathan Brooks | prospect | **medium** — referral waiting on a call, no deadline | Prospect referred by existing client Dana Whitfield; seeking family planning intro call |
+| `inb-003` | email | Marcus Reed (Lumen Analytics) | vendor | **low** — unsolicited; nothing breaks if he never hears back | Lumen Analytics pitching portfolio analytics platform; requesting 20-min demo next week |
+| `inb-004` | linkedin | Priya N. (TalentBridge Recruiting) | recruiter | **low** — recruiting; nobody at the firm is waiting | Recruiter pitching senior role opportunity with their client |
+| `inb-008` | email | unsigned (Market Daily) | spam | **low** — newsletter; archiving it is handling it | Automated market newsletter from Market Daily |
+| `inb-010` | web form | unsigned | — | **parked** — never reaches the model | blank — the message contains no letters or numbers |
+| `inb-011` | email | `=?utf-8?B?` | — | **parked** — never reaches the model | broken — the message contains characters that aren't readable text |
 
-The two parked rows never reach the model. The other eleven match the answer key
-in `eval/answer-key.json`, which was written by hand before the model ran — that
-agreement is the 24/24 `scripts/eval.mts` reports.
+The eleven that reach the model match the answer key in `eval/answer-key.json`,
+written by hand before it ran — that agreement is the 24/24 `scripts/eval.mts`
+reports.
 
-Four rows are worth reading against each other, because they're where the rules
-actually bite:
-
-- **`inb-005` is high and has no deadline in it.** An existing client angry
-  enough about a fee to phone instead of write. Leave him a day and the firm
-  doesn't have a client.
-- **`inb-001` is $8M and medium.** Gregory set no deadline, so nothing breaks if
-  he waits until Thursday. The money is in his summary, not in his priority.
-- **`inb-006` opens with "no rush at all" and is still medium.** She asked a real
-  question and is waiting on an answer; the sender doesn't set the priority.
-- **`inb-009` is the one the model wouldn't guess at.** Sam Cho's message alone
-  can't say what he wants, and a confident wrong label routes a possible client
-  to the wrong queue. With the sender lookup below, this row wouldn't need a
-  human at all.
+Read the high rows against `inb-001`. Dana and Bob are the only two where
+something breaks today, and neither is the biggest opportunity on the page.
+Gregory is, and he waits until Thursday.
 
 ## Design choices and tradeoffs
 
