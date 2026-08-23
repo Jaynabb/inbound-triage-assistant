@@ -2,8 +2,8 @@
 
 ## Where the prompt lives
 
-`lib/prompt.ts`. It's a hand-written template with two generated sections —
-roughly a quarter of the final text is generated, the rest is prose I wrote.
+`lib/prompt.ts`. It's a hand-written template with two generated sections: the
+category list and the priority definitions. Everything else is prose I wrote.
 
 `buildSystemPrompt()` renders the **category list** and the **priority
 definitions** from `CATEGORY_DEFINITIONS` and `PRIORITY_DEFINITIONS` in
@@ -36,20 +36,24 @@ node scripts/dump-prompt.mts > prompts/triage.system.txt
 
 ## Structure
 
-Five parts, in this order. The first is the opening paragraph; the other four
-are headed sections in `prompts/triage.system.txt`.
+Six parts, in this order. The first is the opening paragraph; the other five are
+headed sections in `prompts/triage.system.txt`.
 
 1. **Role and stakes** *(opening paragraph, no heading)* — who the firm is, and
    that a human reads the output to decide what to handle first.
 2. **Categories** *(generated)* — the seven, each with a one-line definition.
-3. **Priority** *(definitions generated, prose hand-written)* — stated as a
+3. **How messages arrive** — the four channels and what each one implies: a web
+   form often has no subject, a voicemail transcript never does and reads like
+   speech, a LinkedIn message is answered on LinkedIn. Says explicitly that a
+   missing subject is a fact about the channel and never lowers the priority.
+4. **Priority** *(definitions generated, prose hand-written)* — stated as a
    single question, *what breaks if this waits?*, plus two explicit
    prohibitions: deal size never raises priority, and the sender doesn't set it
    in either direction.
-4. **Worked examples** — three, showing the rule both ways (big money with no
+5. **Worked examples** — three, showing the rule both ways (big money with no
    deadline → medium; trivial admin with a 24-hour deadline → high; unsolicited
-   outreach → low). Deliberately invented, never messages from the queue.
-5. **Honesty rules** — when to use `needs_human`, that `(individual)` and
+   outreach → low). Invented, never messages from the queue.
+6. **Honesty rules** — when to use `needs_human`, that `(individual)` and
    `(unknown)` are placeholders rather than company names, and that a missing
    subject or sender means nothing on its own.
 
