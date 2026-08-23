@@ -1,11 +1,15 @@
 /* ============================================================
    Inbound triage — visual system
 
-   One axis, rendered in INK. Priority answers a single question
-   — what breaks if this waits — so the page has one hierarchy
-   and nothing competing with it. High-priority rows print in
-   the negative. Achromatic on purpose: the "what's on fire"
-   scan doesn't depend on colour vision.
+   One axis. Priority answers a single question — what breaks
+   if this waits — so the page has one hierarchy and nothing
+   competing with it. High-priority rows keep the paper and take
+   a red outline: the page stays one surface, and the urgent
+   rows are the only outlined things on it.
+
+   The colour never carries the signal alone. Every high row
+   also wears the "today" stamp and sits under a heading that
+   says Handle today, so the scan works without colour vision.
 
    Brass survives as the interaction accent only (focus rings,
    active filter). It no longer encodes data.
@@ -226,13 +230,17 @@ main {
   color: var(--ink-3);
 }
 
-/* The urgent panel wears the same negative treatment as the urgent rows, so
-   the count and the messages read as one signal rather than two. */
+/* The urgent panel wears the same treatment as the urgent rows, so the count
+   and the messages read as one signal rather than two. */
 .panel-high {
-  background: var(--negative-bg);
-  border-color: var(--negative-bg);
-  color: var(--negative-ink);
+  --negative-ink-2: var(--ink-3);
+  --negative-rule: var(--urgent);
+
+  background: var(--sheet);
+  border-color: var(--urgent);
+  color: var(--ink);
 }
+.panel-high .panel-n { color: var(--urgent); }
 .panel-high .panel-label { color: var(--negative-ink-2); }
 .panel-high:hover:not(:disabled) { border-color: var(--negative-rule); }
 
@@ -245,7 +253,12 @@ main {
 .panel-failed .panel-n { color: var(--brass); }
 
 .panel.is-active { border-color: var(--ink); }
-.panel-high.is-active { border-color: var(--brass); }
+/* Already outlined, so the active state thickens the same red rather than
+   introducing a second colour. */
+.panel-high.is-active {
+  border-color: var(--urgent);
+  box-shadow: inset 0 0 0 1px var(--urgent);
+}
 
 .panel.is-empty { opacity: 0.45; cursor: default; }
 
@@ -335,11 +348,21 @@ section + section { margin-top: 42px; }
 
 /* URGENCY IN INK — the whole hierarchy lives in these four rules. */
 
+/* Urgency as an outline, not an inversion. The child rules below all reverse
+   out of --negative-*; rebinding those four here re-points every one of them
+   at the light palette in a single place, instead of overriding each rule
+   separately and missing one. The uniform border also replaces the base row's
+   3px left stripe, so an urgent row is outlined rather than tagged. */
 .row.p-high {
-  background: var(--negative-bg);
-  border-color: var(--negative-bg);
-  border-left-color: var(--negative-bg);
-  color: var(--negative-ink);
+  --negative-bg: var(--sheet);
+  --negative-ink: var(--ink);
+  --negative-ink-2: var(--ink-2);
+  --negative-rule: var(--rule-strong);
+  --negative-brass: var(--brass-ink);
+
+  background: var(--sheet);
+  border: 1.5px solid var(--urgent);
+  color: var(--ink);
   padding: 19px 18px 18px;
 }
 
@@ -471,7 +494,12 @@ section + section { margin-top: 42px; }
   border-left-color: var(--brass);
   border-left-width: 4px;
 }
-.row.p-high.is-review { border-left-color: var(--negative-brass); }
+/* Urgency owns the outline, so a high row that also needs a human keeps the
+   red and says so with the brass flag instead of a second border colour. */
+.row.p-high.is-review {
+  border-left-color: var(--urgent);
+  border-left-width: 1.5px;
+}
 
 .tag-review,
 .flag {
@@ -524,29 +552,6 @@ section + section { margin-top: 42px; }
 .retry:hover:not(:disabled) { border-color: var(--ink); color: var(--ink); }
 .retry:disabled { opacity: 0.45; cursor: progress; }
 .retry:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
-/* Marks a high row as urgent even out of context — filtered, or scrolled past
-   its heading. Reversed out of the negative background so it reads as a stamp. */
-.today {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--urgent-ink);
-  background: var(--urgent);
-  border-radius: 2px;
-  padding: 2px 7px;
-  white-space: nowrap;
-}
-
-/* ANYTHING THE MODEL COULDN'T DECIDE WEARS BRASS.
-   Urgency owns the ink, so this needs its own channel — a black row and a
-   brass row are asking for two different things from the reader. */
-.row.is-review {
-  border-left-color: var(--brass);
-  border-left-width: 4px;
-}
-.row.p-high.is-review { border-left-color: var(--negative-brass); }
 
 .tag-review,
 
