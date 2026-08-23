@@ -97,6 +97,9 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
      rather than one id because retrying the whole failed band is one request,
      not one per message. */
   const [retrying, setRetrying] = useState<string[]>([]);
+  /* Failed messages ticked for retry. At thirteen you'd retry the band; at ten
+     thousand you pick, so the band button follows the selection. */
+  const [selected, setSelected] = useState<string[]>([]);
 
   async function run() {
     setRunning(true);
@@ -157,7 +160,16 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
       // nothing.
     } finally {
       setRetrying([]);
+      // Whatever was just retried is no longer a pending choice, whether it
+      // came back triaged or failed again.
+      setSelected((prev) => prev.filter((id) => !ids.includes(id)));
     }
+  }
+
+  function toggleSelected(id: string) {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
   }
 
   const bands = useMemo(() => {
@@ -258,7 +270,15 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
               items={bands.failed}
               results={results!}
               onRetry={(id) => retry([id])}
-              onRetryAll={() => retry(bands.failed.map((i) => i.id))}
+              onRetryAll={() =>
+                retry(
+                  selected.length > 0
+                    ? selected
+                    : bands.failed.map((i) => i.id),
+                )
+              }
+              selected={selected}
+              onToggleSelected={toggleSelected}
               retrying={retrying}
             />
           )}
@@ -309,6 +329,8 @@ function Band({
   results,
   onRetry,
   onRetryAll,
+  selected,
+  onToggleSelected,
   retrying,
 }: {
   title: string;
@@ -316,8 +338,16 @@ function Band({
   results: Record<string, TriagedItem>;
   onRetry?: (id: string) => void;
   onRetryAll?: () => void;
+  selected?: string[];
+  onToggleSelected?: (id: string) => void;
   retrying?: string[];
 }) {
+  // One failure is a button on the row. More than one is a list you choose
+  // from — at real volume you don't want "retry everything" to be the only
+  // move available.
+  const selectable = Boolean(onToggleSelected) && items.length > 1;
+  const busy = (retrying?.length ?? 0) > 0;
+  const picked = selected?.length ?? 0;
   return (
     <section>
       <div className="band">
@@ -330,8 +360,11 @@ function Band({
           key={item.id}
           item={item}
           triaged={results[item.id]}
-          onRetry={onRetry}
+          onRetry={selectable ? undefined : onRetry}
           retrying={retrying?.includes(item.id)}
+          selectable={selectable}
+          selected={selected?.includes(item.id)}
+          onToggleSelected={onToggleSelected}
         />
       ))}
 
@@ -339,16 +372,23 @@ function Band({
           outage lands a page of these, and clearing them one row at a time
           isn't a recovery path — this re-triages the whole band in a single
           request. With one failure the row's own button already says it. */}
-      {onRetryAll && items.length > 1 && (
+      {onRetryAll && selectable && (
         <div className="band-foot">
+          {picked > 0 && (
+            <span className="band-foot-note">
+              {picked} of {items.length} selected
+            </span>
+          )}
           <button
             className="retry retry-all"
             onClick={onRetryAll}
-            disabled={(retrying?.length ?? 0) > 0}
+            disabled={busy}
           >
-            {(retrying?.length ?? 0) > 0
+            {busy
               ? `Retrying ${retrying!.length}…`
-              : `Retry all ${items.length}`}
+              : picked > 0
+                ? `Retry ${picked} selected`
+                : `Retry all ${items.length}`}
           </button>
         </div>
       )}
@@ -370,11 +410,17 @@ function Row({
   triaged,
   onRetry,
   retrying,
+  selectable,
+  selected,
+  onToggleSelected,
 }: {
   item: InboundItem;
   triaged: TriagedItem;
   onRetry?: (id: string) => void;
   retrying?: boolean;
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelected?: (id: string) => void;
 }) {
   const r = triaged.result;
   const inert =
@@ -491,6 +537,20 @@ function Row({
               >
                 {retrying ? "Retrying…" : "Retry this message"}
               </button>
+            )}
+            {/* A native checkbox on purpose — this is a list you tick, and
+                inventing a control for a standard job costs the reader the
+                keyboard behaviour they already know. */}
+            {triaged.status === "error" && selectable && onToggleSelected && (
+              <label className="pick">
+                <input
+                  type="checkbox"
+                  checked={Boolean(selected)}
+                  disabled={retrying}
+                  onChange={() => onToggleSelected(item.id)}
+                />
+                <span>{retrying ? "retrying…" : "retry this one"}</span>
+              </label>
             )}
           </div>
         </>

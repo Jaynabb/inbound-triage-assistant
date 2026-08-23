@@ -33,13 +33,17 @@ node scripts/verify-signal.mts
 **To see a failure handled**, run with one message set to fail:
 
 ```bash
-TRIAGE_FAIL_IDS=inb-003 npm run dev
+TRIAGE_FAIL_IDS=inb-003,inb-006 npm run dev
 ```
 
-`inb-003` comes back under *Couldn't reach the model* with the reason on the
-row — the model was overloaded and didn't answer on either attempt — while the
-other twelve triage normally. **Retry this message** re-runs that one message
-and it lands in its band. One call failing costs one row, not the queue.
+Those two come back under *Couldn't reach the model* with the reason on each row
+— the model was overloaded and didn't answer on either attempt — while the other
+eleven triage normally. One call failing costs one row, not the queue.
+
+Recovery is per-message. Tick the rows worth re-running and the band retries
+exactly those in one request; with nothing ticked it offers the whole band. Drop
+to a single failure and the checkboxes go away — that row just gets a **Retry
+this message** button, because choosing from a list of one isn't a choice.
 
 **The API key never reaches the browser.** Triage runs in a route handler
 (`app/api/triage/route.ts`), so the Anthropic client only ever exists in the

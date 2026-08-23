@@ -255,10 +255,12 @@ decides when anything gets looked at. Then Bob is flagged within seconds of
 calling in.
 
 Recovery has to scale with the queue too. A rate limit or an overload doesn't
-fail one message, it fails whatever was in flight — so the failed band has one
-button that re-triages the whole band in a single request. Per-row retry is
-there for a one-off, but clicking through a page of failures isn't a recovery
-path, and at volume that page is what an outage looks like.
+fail one message, it fails whatever was in flight, and at volume that's a page
+of them. So the failed rows are selectable and the band retries the ones you
+tick in a single request. Retry-everything is the fallback when nothing is
+ticked, not the only move — at ten thousand a day you want to re-run the ones
+that are worth re-running, not the whole outage. A single failure skips all of
+that and just puts a button on the row.
 
 That means several triggers, not one, because the queue isn't all email. Of
 these 13, eight are email, three are web-form submissions, one is LinkedIn and
