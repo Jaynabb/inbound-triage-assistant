@@ -10,7 +10,7 @@
  * Run:
  *   node --env-file=.env.local scripts/eval.mts
  *   node --env-file=.env.local scripts/eval.mts --model claude-sonnet-5
- *   node --env-file=.env.local scripts/eval.mts --from outputs/haiku.json   (score a saved run)
+ *   node --env-file=.env.local scripts/eval.mts --from outputs/run.json    (score a saved run)
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
