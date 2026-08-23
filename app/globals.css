@@ -172,13 +172,28 @@ main {
    badge for the sake of having a badge. */
 
 .panels {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 34px;
 }
 
+/* The three service standards are the queue. The last two are what fell out of
+   it — one we couldn't reach the model for, one we couldn't read. A hairline
+   is enough to say they're different kinds of thing; rendering all five as
+   equal boxes says they're peers, and they aren't. */
+.panel-split {
+  flex: 0 0 1px;
+  align-self: stretch;
+  background: var(--rule);
+  margin: 2px 8px;
+}
+
 .panel {
+  /* Grows to share the row, never narrower than its own count and label.
+     The old fixed 4-column grid stranded the fifth panel on its own line. */
+  flex: 1 1 108px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -235,7 +250,9 @@ main {
 .panel.is-empty { opacity: 0.45; cursor: default; }
 
 @media (max-width: 620px) {
-  .panels { grid-template-columns: repeat(2, 1fr); }
+  /* Wrapping already groups them two-up; the hairline would land mid-row. */
+  .panel-split { display: none; }
+  .panel { flex-basis: 40%; }
 }
 
 .standin {

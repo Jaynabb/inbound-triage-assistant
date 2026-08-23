@@ -183,6 +183,15 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
           list — no badge that doesn't do anything. */}
       {bands && (
         <div className="panels">
+          {/* Clearing a filter by clicking the active panel again is a thing
+              you have to already know. This says it. */}
+          <Panel
+            n={items.length}
+            label="All"
+            tone="all"
+            active={only === null}
+            onClick={() => setOnly(null)}
+          />
           {BANDS.map(({ key, short }) => (
             <Panel
               key={key}
@@ -193,9 +202,10 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
               onClick={() => setOnly(only === key ? null : key)}
             />
           ))}
+          <span className="panel-split" aria-hidden="true" />
           <Panel
             n={bands.failed.length}
-            label="Couldn't triage"
+            label="Failed"
             tone="failed"
             active={only === "failed"}
             onClick={() => setOnly(only === "failed" ? null : "failed")}
@@ -258,7 +268,7 @@ function Panel({
 }: {
   n: number;
   label: string;
-  tone: BandKey;
+  tone: BandKey | "all";
   active: boolean;
   onClick: () => void;
 }) {
