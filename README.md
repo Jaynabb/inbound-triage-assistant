@@ -16,6 +16,10 @@ cp .env.example .env.local     # add your ANTHROPIC_API_KEY
 npm run dev                    # http://localhost:3000
 ```
 
+**Node 22.18 or newer**, because the two scripts below are TypeScript that node
+runs directly — older versions don't strip the types and fail with a syntax
+error rather than something you can act on.
+
 Click **Triage the inbox** — about 10 seconds. Two checks from the command line:
 
 ```bash
