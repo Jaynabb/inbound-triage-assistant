@@ -182,7 +182,7 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
       {/* Counts panel. Every number here is real and every panel filters the
           list — no badge that doesn't do anything. */}
       {bands && (
-        <div className="panels">
+        <div className={`panels${only ? " is-filtered" : ""}`}>
           {/* Clearing a filter by clicking the active panel again is a thing
               you have to already know. This says it. */}
           <Panel

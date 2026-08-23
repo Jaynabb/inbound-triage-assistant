@@ -210,7 +210,11 @@ main {
   text-align: left;
   font: inherit;
   color: inherit;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease,
+    opacity 0.15s ease, box-shadow 0.15s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel { transition: none; }
 }
 .panel:hover:not(:disabled) { border-color: var(--rule-strong); }
 .panel:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
@@ -252,7 +256,20 @@ main {
    negative treatment that belongs to urgency. */
 .panel-failed .panel-n { color: var(--brass); }
 
-.panel.is-active { border-color: var(--ink); }
+/* One chip is always active, so selection can't rely on a 1px colour swap on a
+   1px border — you'd have to go looking for it. The ring makes the chip itself
+   read as pressed, and .is-filtered makes the rest step back so the answer to
+   "what am I looking at" is visible without reading a single label. */
+.panel.is-active {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.panels.is-filtered .panel:not(.is-active) { opacity: 0.4; }
+/* Still reachable — hover or keyboard focus brings a dimmed chip back, so you
+   can see what you're about to switch to whichever way you got there. */
+.panels.is-filtered .panel:not(.is-active):hover:not(:disabled),
+.panels.is-filtered .panel:not(.is-active):focus-visible { opacity: 1; }
 /* Already outlined, so the active state thickens the same red rather than
    introducing a second colour. */
 .panel-high.is-active {
