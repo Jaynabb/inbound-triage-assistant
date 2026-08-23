@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { TriagedItem, Priority } from "../lib/schema.ts";
+import type { TriagedItem, Priority, Category } from "../lib/schema.ts";
 import type { InboundItem } from "../lib/triage.ts";
 
 interface Meta {
@@ -61,6 +61,18 @@ type BandKey = Priority | "failed" | "inert";
  * that doesn't have the field — which is exactly why the pre-flight filter
  * reads the body and nothing else.
  */
+/**
+ * How a category is written on screen, where it differs from the enum.
+ *
+ * The enum is the routing key and stays terse; this is the operator's
+ * phrasing. "needs human" states a fact about the message, "needs human
+ * review" names the action — and naming the action is the whole reason the
+ * category exists.
+ */
+const CATEGORY_LABELS: Partial<Record<Category, string>> = {
+  needs_human: "needs human review",
+};
+
 const CHANNEL_LABELS: Record<string, string> = {
   email: "email",
   "web-form": "web form",
@@ -514,12 +526,12 @@ function Row({
             {/* The flag only appears when the category doesn't already say it —
                 low confidence on a category the model WAS willing to pick. */}
             {triaged.status === "review" && r.category !== "needs_human" && (
-              <span className="flag">needs a human</span>
+              <span className="flag">needs human review</span>
             )}
             <span
               className={`tag${r.category === "needs_human" ? " tag-review" : ""}`}
             >
-              {r.category.replace("_", " ")}
+              {CATEGORY_LABELS[r.category] ?? r.category.replace("_", " ")}
             </span>
           </span>
         )}
@@ -548,7 +560,7 @@ function Row({
             </details>
             {triaged.status === "review" && (
               <details className="why">
-                <summary>why it needs a human</summary>
+                <summary>why it needs review</summary>
                 <p className="why-body">{r.reasoning}</p>
               </details>
             )}
