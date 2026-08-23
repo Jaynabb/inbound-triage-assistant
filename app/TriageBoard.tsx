@@ -48,7 +48,7 @@ const BANDS: Array<{ key: Priority; title: string; short: string }> = [
   { key: "low", title: "Within 3 business days", short: "3 days" },
 ];
 
-type BandKey = Priority | "inert";
+type BandKey = Priority | "failed" | "inert";
 
 /**
  * Not every message is an email. The queue also carries web-form submissions,
@@ -93,6 +93,8 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
   const [ranAt, setRanAt] = useState<string | null>(null);
   /* Null = show everything. Set by clicking a panel. */
   const [only, setOnly] = useState<BandKey | null>(null);
+  /* Id of the row currently being re-run, so only that row shows a spinner. */
+  const [retrying, setRetrying] = useState<string | null>(null);
 
   async function run() {
     setRunning(true);
@@ -121,15 +123,40 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
     }
   }
 
+  /** Re-runs a single message. One failed call shouldn't cost a whole re-run. */
+  async function retryOne(id: string) {
+    setRetrying(id);
+    try {
+      const res = await fetch("/api/triage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: [id] }),
+      });
+      const body = await res.json();
+      if (!res.ok) return;
+      const fresh = (body.results as TriagedItem[])[0];
+      if (fresh) setResults((prev) => ({ ...prev!, [fresh.id]: fresh }));
+    } catch {
+      // Leave the row as it was. It already says why it failed, and a failed
+      // retry that wipes the reason is worse than one that changes nothing.
+    } finally {
+      setRetrying(null);
+    }
+  }
+
   const bands = useMemo(() => {
     if (!results) return null;
     const grouped: Record<string, InboundItem[]> = {
-      high: [], medium: [], low: [], inert: [],
+      high: [], medium: [], low: [], failed: [], inert: [],
     };
     for (const item of items) {
       const r = results[item.id];
-      const p = r?.result?.priority;
-      grouped[p && r.status !== "error" ? p : "inert"].push(item);
+      // A call that failed is not the same thing as a message we couldn't
+      // read. The message was fine; we didn't reach the model. It gets its own
+      // bucket because the action is different — retry it, don't bin it.
+      if (r?.status === "error") grouped.failed.push(item);
+      else if (r?.result?.priority) grouped[r.result.priority].push(item);
+      else grouped.inert.push(item);
     }
     return grouped;
   }, [results, items]);
@@ -167,6 +194,13 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
             />
           ))}
           <Panel
+            n={bands.failed.length}
+            label="Couldn't triage"
+            tone="failed"
+            active={only === "failed"}
+            onClick={() => setOnly(only === "failed" ? null : "failed")}
+          />
+          <Panel
             n={bands.inert.length}
             label="Unreadable"
             tone="inert"
@@ -191,6 +225,15 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
             bands[key].length && (!only || only === key) ? (
               <Band key={key} title={title} items={bands[key]} results={results!} />
             ) : null,
+          )}
+          {bands.failed.length > 0 && (!only || only === "failed") && (
+            <Band
+              title="Couldn't reach the model"
+              items={bands.failed}
+              results={results!}
+              onRetry={retryOne}
+              retrying={retrying}
+            />
           )}
           {bands.inert.length > 0 && (!only || only === "inert") && (
             <Band title="Nothing to act on" items={bands.inert} results={results!} />
@@ -237,10 +280,14 @@ function Band({
   title,
   items,
   results,
+  onRetry,
+  retrying,
 }: {
   title: string;
   items: InboundItem[];
   results: Record<string, TriagedItem>;
+  onRetry?: (id: string) => void;
+  retrying?: string | null;
 }) {
   return (
     <section>
@@ -250,7 +297,13 @@ function Band({
         <span className="band-n">{items.length}</span>
       </div>
       {items.map((item) => (
-        <Row key={item.id} item={item} triaged={results[item.id]} />
+        <Row
+          key={item.id}
+          item={item}
+          triaged={results[item.id]}
+          onRetry={onRetry}
+          retrying={retrying === item.id}
+        />
       ))}
     </section>
   );
@@ -265,7 +318,17 @@ function Tally({ n, label }: { n: number; label: string }) {
   );
 }
 
-function Row({ item, triaged }: { item: InboundItem; triaged: TriagedItem }) {
+function Row({
+  item,
+  triaged,
+  onRetry,
+  retrying,
+}: {
+  item: InboundItem;
+  triaged: TriagedItem;
+  onRetry?: (id: string) => void;
+  retrying?: boolean;
+}) {
   const r = triaged.result;
   const inert =
     triaged.status === "skipped_malformed" || triaged.status === "error";
@@ -365,10 +428,24 @@ function Row({ item, triaged }: { item: InboundItem; triaged: TriagedItem }) {
           <p className="note">{triaged.note}</p>
           {/* Readable on the unreadable ones too — being able to see WHAT was
               rejected is the point of not dropping them silently. */}
-          <details className="why why-inert">
-            <summary>message</summary>
-            <pre className="why-body raw-body">{item.body}</pre>
-          </details>
+          <div className="toggles">
+            <details className="why why-inert">
+              <summary>message</summary>
+              <pre className="why-body raw-body">{item.body}</pre>
+            </details>
+            {/* Only a failed CALL is retryable. A blank message is still blank
+                the second time — offering to retry it would be a button that
+                promises something it can't do. */}
+            {triaged.status === "error" && onRetry && (
+              <button
+                className="retry"
+                onClick={() => onRetry(item.id)}
+                disabled={retrying}
+              >
+                {retrying ? "Retrying…" : "Retry this message"}
+              </button>
+            )}
+          </div>
         </>
       )}
     </article>

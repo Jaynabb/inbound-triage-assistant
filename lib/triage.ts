@@ -27,6 +27,56 @@ import { checkSignal } from "./signal.ts";
  * not guarantee the values make sense.
  */
 
+/**
+ * Failure injection, for demonstrating the unhappy path.
+ *
+ * A call that fails has to be shown failing, and waiting for a real 429 isn't a
+ * demo. `TRIAGE_FAIL_IDS=inb-003` makes that one message raise a transient
+ * error while every other message triages normally — which is the behaviour
+ * worth showing: one thing breaks, the queue keeps working.
+ *
+ * It only applies to a full-queue run, so retrying the failed message reaches
+ * the real API and succeeds — otherwise the retry button would be a control
+ * that can never resolve. Unset in normal use, and it can only ever cause a
+ * failure, never fake a success.
+ */
+class SimulatedAPIError extends Error {
+  readonly status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
+/**
+ * Why the call failed, said to an operator rather than to a log.
+ *
+ * The only thing a person reading the queue needs from a failure is whether
+ * the message is the problem or we are, and whether trying again will help.
+ * A raw API payload answers neither. Every branch here says which of the two
+ * it is, so nobody has to guess whether the message is salvageable.
+ */
+function explainFailure(status: number, message: string): string {
+  if (status === 401 || status === 403)
+    return "The API key was rejected, so this message never reached the model. Nothing is wrong with the message — fix the key and retry.";
+  if (status === 429)
+    return "Rate limited by the API, twice. Nothing is wrong with the message — retry in a moment, or lower the concurrency if it keeps happening.";
+  if (status === 529 || status >= 500)
+    return `The model was overloaded and didn't answer (${status}), on both attempts. Nothing is wrong with the message — retry it.`;
+  if (status === 0)
+    return "Couldn't reach the API at all — network or DNS. Nothing is wrong with the message; retry once you're back online.";
+  if (status === 400)
+    return `The API rejected the request itself (400). That's ours to fix, not something a retry will clear — ${message}`;
+  return `The call failed (${status}) — ${message}`;
+}
+
+function injectedFailure(id: string, enabled: boolean): boolean {
+  if (!enabled) return false;
+  const ids = process.env.TRIAGE_FAIL_IDS;
+  if (!ids) return false;
+  return ids.split(",").map((s) => s.trim()).filter(Boolean).includes(id);
+}
+
 export const DEFAULT_MODEL = "claude-haiku-4-5-20251001";
 
 /** Generated from the zod schema — never hand-written, so it cannot drift. */
@@ -55,6 +105,8 @@ export interface TriageOptions {
   model?: string;
   /** Injected so tests can run without network. */
   client?: Anthropic;
+  /** Honour TRIAGE_FAIL_IDS. Set only for a full-queue run — see below. */
+  injectFailures?: boolean;
 }
 
 function getClient(): Anthropic {
@@ -176,6 +228,12 @@ export async function triageOne(
   // Attempt 1, then one corrective retry. Two total — deliberately not a loop.
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
+      if (injectedFailure(item.id, opts.injectFailures ?? false)) {
+        // Raised as a real 529 so it travels the same path a genuine overload
+        // does — same classification, same retry, same message on the row.
+        // A drill that takes a shortcut isn't testing anything.
+        throw new SimulatedAPIError(529, "overloaded_error");
+      }
       const response = await client.messages.create({
         model,
         max_tokens: 1024,
@@ -249,7 +307,9 @@ export async function triageOne(
       // Network, auth, rate limit, overload. Retry once on transient classes;
       // fail immediately on anything that a retry cannot fix.
       const status =
-        err instanceof Anthropic.APIError ? err.status ?? 0 : 0;
+        err instanceof Anthropic.APIError || err instanceof SimulatedAPIError
+          ? err.status ?? 0
+          : 0;
       const transient = status === 429 || status === 529 || status >= 500 || status === 0;
       lastProblem = err instanceof Error ? err.message : String(err);
 
@@ -258,7 +318,7 @@ export async function triageOne(
           id: item.id,
           status: "error",
           result: null,
-          note: `API error: ${lastProblem}`,
+          note: explainFailure(status, lastProblem),
           latency_ms: Date.now() - started,
         };
       }
@@ -270,7 +330,7 @@ export async function triageOne(
     id: item.id,
     status: "error",
     result: null,
-    note: `failed schema validation twice — ${lastProblem}`,
+    note: `The model returned something invalid twice — ${lastProblem}. Flagged rather than guessed at, because category and priority decide where this goes.`,
     latency_ms: Date.now() - started,
   };
 }

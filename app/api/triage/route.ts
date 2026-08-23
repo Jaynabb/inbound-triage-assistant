@@ -20,11 +20,27 @@ function loadInbound(): InboundItem[] {
   return JSON.parse(readFileSync(path, "utf8"));
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const items = loadInbound();
+
+    // A retry from the board sends the ids it wants re-run; no body means the
+    // whole queue. Retrying one message costs one API call instead of eleven,
+    // which is the difference between a usable retry and a second full run.
+    let queue = items;
+    const body = await request.json().catch(() => null);
+    const ids: unknown = body && typeof body === "object" ? (body as any).ids : null;
+    if (Array.isArray(ids) && ids.length > 0) {
+      const wanted = new Set(ids.map(String));
+      queue = items.filter((i) => wanted.has(i.id));
+    }
+
     const started = Date.now();
-    const results = await triageAll(items);
+    // Failure injection applies to a full run only, so a retry of a failed
+    // message reaches the real API. See injectedFailure in lib/triage.ts.
+    const results = await triageAll(queue, {
+      injectFailures: queue.length === items.length,
+    });
 
     return NextResponse.json({
       results,

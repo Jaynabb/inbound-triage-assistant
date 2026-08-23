@@ -30,6 +30,17 @@ node --env-file=.env.local scripts/eval.mts
 node scripts/verify-signal.mts
 ```
 
+**To see a failure handled**, run with one message set to fail:
+
+```bash
+TRIAGE_FAIL_IDS=inb-003 npm run dev
+```
+
+`inb-003` comes back under *Couldn't reach the model* with the reason on the
+row — the model was overloaded and didn't answer on either attempt — while the
+other twelve triage normally. **Retry this message** re-runs that one message
+and it lands in its band. One call failing costs one row, not the queue.
+
 **The API key never reaches the browser.** Triage runs in a route handler
 (`app/api/triage/route.ts`), so the Anthropic client only ever exists in the
 Node process.

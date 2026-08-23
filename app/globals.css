@@ -221,8 +221,13 @@ main {
 .panel-high .panel-label { color: var(--negative-ink-2); }
 .panel-high:hover:not(:disabled) { border-color: var(--negative-rule); }
 
-.panel-low, .panel-inert { background: var(--sheet-sunk); }
+.panel-low, .panel-inert, .panel-failed { background: var(--sheet-sunk); }
 .panel-inert .panel-n { color: var(--ink-3); }
+
+/* A failed call is recoverable, an unreadable message isn't. The brass count
+   says "this one still needs something from you" without borrowing the
+   negative treatment that belongs to urgency. */
+.panel-failed .panel-n { color: var(--brass); }
 
 .panel.is-active { border-color: var(--ink); }
 .panel-high.is-active { border-color: var(--brass); }
@@ -482,6 +487,26 @@ section + section { margin-top: 42px; }
 }
 
 .why { flex: 0 0 auto; }
+
+/* Sits with the row's other affordances rather than floating, so a failed row
+   reads the same as every other row plus one thing you can do about it. */
+.retry {
+  flex: 0 0 auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 11px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.retry:hover:not(:disabled) { border-color: var(--ink); color: var(--ink); }
+.retry:disabled { opacity: 0.45; cursor: progress; }
+.retry:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
 /* Marks a high row as urgent even out of context — filtered, or scrolled past
    its heading. Reversed out of the negative background so it reads as a stamp. */
 .today {
