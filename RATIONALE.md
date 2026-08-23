@@ -226,6 +226,17 @@ coming from the customer side. Knowing which one you're looking at tells you how
 to fix it. Junk coming in is normal and you do nothing. Errors mean something on
 our end is broken.
 
+That distinction is on the screen, not just in the data. A failed call gets its
+own band — *Couldn't reach the model* — rather than sitting with the blank and
+broken ones, and the row says which kind of failure it was in terms a reader can
+act on: a 401 means the key was rejected and the message never reached the
+model, a 529 means the model was overloaded and it's worth retrying, a 400 means
+it's ours to fix and retrying won't clear it. Retry re-runs that one message
+instead of the whole queue, and it's only offered on a failed call — a blank
+message is still blank the second time, so a retry button there would promise
+something it can't do. `TRIAGE_FAIL_IDS=inb-003 npm run dev` fails one message
+on purpose, so the path can be seen rather than described.
+
 ## e. Scale & risk
 
 Right now it's one API call per message. 13 messages takes about 10 seconds, so
