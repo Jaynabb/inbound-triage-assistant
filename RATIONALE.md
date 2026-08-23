@@ -146,19 +146,11 @@ working it out on something it hadn't been shown.
 
 Priority went from 9/11 to 11/11 (`scripts/eval.mts`).
 
-That said, 11 messages is too small a sample to trust. Going from 9 right to 11
-right is two messages. It tells me the fix works on the problem I found. It
-doesn't tell me the system is right. Before I relied on it I'd want a few
-hundred labeled messages, and I'd track priority accuracy over time instead of
-quoting one number.
-
-**And the score isn't perfectly stable between runs.** I ran the eval five times
-back to back near the end: four came back 24/24 and one came back 23/24. Same
-prompt, same messages, `temperature: 0`. Temperature 0 makes a model much more
-consistent but it doesn't make it deterministic, so a single score is a sample
-too — not a fixed property of the system. That's another reason a number off 11
-messages shouldn't be leaned on, and another argument for tracking accuracy as a
-running metric in production rather than quoting a run.
+Eleven messages is a small sample, and the score moves: across five back-to-back
+runs I saw four 24/24 and one 23/24, same prompt, same messages, `temperature:
+0`. Temperature 0 makes a model consistent, not deterministic. So the number
+tells me the fix works on the problem I found, not that the system is right —
+in production I'd track accuracy as a running metric rather than quote a run.
 
 ## d. Edge cases
 
@@ -224,10 +216,6 @@ out — which is the worst thing this system can do.
 So blank means no letters or numbers at all. There's no number to tune and no
 threshold to defend. `scripts/verify-signal.mts` asserts it both ways: `"ok"`,
 `"a"` and `"call me"` get through; `"."`, `"..."` and `"?!"` are parked.
-
-One limitation worth naming: an emoji-only reply — a client sending just 👍 —
-counts as blank and gets parked. It's still visible in the couldn't-read
-branch rather than deleted, and there's nothing in it to triage anyway.
 
 The skipped messages still show up on screen with the reason. Nothing
 disappears.
