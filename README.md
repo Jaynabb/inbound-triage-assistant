@@ -161,7 +161,8 @@ judgment — intent, urgency, tone. The database is for facts.
 
 `client_since` is empty for anyone who has only ever written in, which is what
 makes the table hold prospects as well as clients: a first-time sender becomes a
-row with no start date, and gets one if they sign.
+row with no start date, and gets one if they sign. A row plus its linked
+messages is the customer profile the triage reads.
 
 It also gives you routing for free: once a message is linked to a client, you
 know which advisor owns them. How n8n attaches all of this before the model
@@ -210,11 +211,19 @@ Two constraints come with any of the paid options:
 ### Look it up, don't guess
 
 Before a message reaches the model, n8n matches the sender's email against the
-Clients table and attaches what the firm already knows: their contact details,
-whether they're a client at all and how long they've been one, the advisor who
-owns them, and their previous messages from the Messages table. A sender with no
-match is a new inquiry, so n8n creates the contact row from the message — the
-second time they write, they're known.
+Clients table and attaches their **customer profile** — everything the firm
+already knows about the person writing in:
+
+- **contact details** — name, email, whatever the record holds
+- **whether they're a client at all, and how long** — `client_since`
+- **the advisor who owns them**
+- **their previous messages**, pulled from the Messages table
+
+**A sender the firm has never heard from isn't a dead end.** No match means this
+is a new customer contact, so n8n creates the profile from the message itself
+and carries on. Nothing is dropped and nothing waits for someone to add them by
+hand — the second time they write, there's a history to attach, and the table
+fills itself as the queue runs.
 
 **`inb-009` is the case for this.** Sam Cho writes "just following up on our
 conversation" and nothing else — no company, no subject, nothing saying what the
@@ -248,10 +257,12 @@ Then everything converges:
             ├─ yes → park in "couldn't read", never call the model
             └─ no  ↓
                        ENRICH
-        match from_email against the Clients table
-            ├─ known  → attach tenure, owning advisor,
-            │           and their previous messages
-            └─ new    → create the contact row, then carry on
+     match from_email against the Clients table
+            ├─ known → attach the customer profile:
+            │          contact details, tenure, owning
+            │          advisor, previous messages
+            └─ new   → create the profile from this
+                       message, then carry on
                            ↓
                        TRIAGE
             POST to the triage endpoint, enrichment included
