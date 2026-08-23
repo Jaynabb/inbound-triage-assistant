@@ -279,6 +279,9 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
               }
               selected={selected}
               onToggleSelected={toggleSelected}
+              onSelectAll={(select) =>
+                setSelected(select ? bands.failed.map((i) => i.id) : [])
+              }
               retrying={retrying}
             />
           )}
@@ -331,6 +334,7 @@ function Band({
   onRetryAll,
   selected,
   onToggleSelected,
+  onSelectAll,
   retrying,
 }: {
   title: string;
@@ -340,6 +344,7 @@ function Band({
   onRetryAll?: () => void;
   selected?: string[];
   onToggleSelected?: (id: string) => void;
+  onSelectAll?: (select: boolean) => void;
   retrying?: string[];
 }) {
   // One failure is a button on the row. More than one is a list you choose
@@ -355,6 +360,31 @@ function Band({
         <span className="band-rule" />
         <span className="band-n">{items.length}</span>
       </div>
+      {/* Select-all sits above the list it governs, the way a table header
+          does. It's the only place the whole-band choice belongs once the rows
+          each carry their own box. */}
+      {selectable && onToggleSelected && (
+        <div className="band-pick">
+          <label className="pick">
+            <input
+              type="checkbox"
+              checked={picked === items.length}
+              ref={(el) => {
+                if (el) el.indeterminate = picked > 0 && picked < items.length;
+              }}
+              disabled={busy}
+              onChange={() => onSelectAll?.(picked !== items.length)}
+            />
+            <span>Select all</span>
+          </label>
+          {picked > 0 && (
+            <span className="band-pick-note">
+              {picked} of {items.length} selected
+            </span>
+          )}
+        </div>
+      )}
+
       {items.map((item) => (
         <Row
           key={item.id}
@@ -374,11 +404,6 @@ function Band({
           request. With one failure the row's own button already says it. */}
       {onRetryAll && selectable && (
         <div className="band-foot">
-          {picked > 0 && (
-            <span className="band-foot-note">
-              {picked} of {items.length} selected
-            </span>
-          )}
           <button
             className="retry retry-all"
             onClick={onRetryAll}
@@ -441,6 +466,19 @@ function Row({
   return (
     <article className={cls}>
       <div className="row-head">
+        {/* Leading the row, where a list you're selecting from puts it. A
+            native checkbox on purpose — inventing a control for a standard job
+            costs the reader the keyboard behaviour they already know. */}
+        {selectable && onToggleSelected && (
+          <input
+            className="row-pick"
+            type="checkbox"
+            checked={Boolean(selected)}
+            disabled={retrying}
+            onChange={() => onToggleSelected(item.id)}
+            aria-label={`Select ${item.id} to retry`}
+          />
+        )}
         <span className="who">
           <span className="rid">{item.id}</span>
           {/* How it arrived changes how you answer it — you call a voicemail
@@ -537,20 +575,6 @@ function Row({
               >
                 {retrying ? "Retrying…" : "Retry this message"}
               </button>
-            )}
-            {/* A native checkbox on purpose — this is a list you tick, and
-                inventing a control for a standard job costs the reader the
-                keyboard behaviour they already know. */}
-            {triaged.status === "error" && selectable && onToggleSelected && (
-              <label className="pick">
-                <input
-                  type="checkbox"
-                  checked={Boolean(selected)}
-                  disabled={retrying}
-                  onChange={() => onToggleSelected(item.id)}
-                />
-                <span>{retrying ? "retrying…" : "retry this one"}</span>
-              </label>
             )}
           </div>
         </>

@@ -564,14 +564,32 @@ section + section { margin-top: 42px; }
 }
 .retry-all { border-color: var(--ink); color: var(--ink); }
 
-.band-foot-note {
+/* Sits between the band heading and the rows it governs. Indented to the same
+   optical line as the row checkboxes below it, so the column reads as one. */
+.band-pick {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  /* 21px = the row's 3px left rule plus its 18px padding. The header box has to
+     land on the same vertical as the row boxes or the column doesn't read. */
+  padding: 0 18px 9px 21px;
+}
+.band-pick-note {
   font-family: var(--mono);
   font-size: 10.5px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-3);
+}
+
+/* Leads the row. align-self overrides the head's baseline alignment, which
+   would otherwise hang the box below the text it belongs to. */
+.row-pick {
   align-self: center;
-  margin-right: 12px;
+  margin: 0 2px 0 0;
+  accent-color: var(--ink);
+  cursor: pointer;
+  flex: 0 0 auto;
 }
 
 /* Native checkbox, styled only as far as sizing it to the row's type. */
