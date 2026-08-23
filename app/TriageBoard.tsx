@@ -93,8 +93,10 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
   const [ranAt, setRanAt] = useState<string | null>(null);
   /* Null = show everything. Set by clicking a panel. */
   const [only, setOnly] = useState<BandKey | null>(null);
-  /* Id of the row currently being re-run, so only that row shows a spinner. */
-  const [retrying, setRetrying] = useState<string | null>(null);
+  /* Ids currently being re-run, so only those rows show a spinner. A list
+     rather than one id because retrying the whole failed band is one request,
+     not one per message. */
+  const [retrying, setRetrying] = useState<string[]>([]);
 
   async function run() {
     setRunning(true);
@@ -123,24 +125,38 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
     }
   }
 
-  /** Re-runs a single message. One failed call shouldn't cost a whole re-run. */
-  async function retryOne(id: string) {
-    setRetrying(id);
+  /**
+   * Re-runs the given messages and nothing else.
+   *
+   * One failed call shouldn't cost a whole re-run, and twelve failed calls
+   * shouldn't cost twelve clicks. The endpoint takes a list, so the band-level
+   * retry is a single request that re-triages exactly what failed — at real
+   * volume an outage lands you a page of failures, and clicking through them
+   * one at a time isn't a recovery path.
+   */
+  async function retry(ids: string[]) {
+    if (ids.length === 0) return;
+    setRetrying(ids);
     try {
       const res = await fetch("/api/triage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: [id] }),
+        body: JSON.stringify({ ids }),
       });
       const body = await res.json();
       if (!res.ok) return;
-      const fresh = (body.results as TriagedItem[])[0];
-      if (fresh) setResults((prev) => ({ ...prev!, [fresh.id]: fresh }));
+      const fresh = body.results as TriagedItem[];
+      setResults((prev) => {
+        const next = { ...prev! };
+        for (const r of fresh) next[r.id] = r;
+        return next;
+      });
     } catch {
-      // Leave the row as it was. It already says why it failed, and a failed
-      // retry that wipes the reason is worse than one that changes nothing.
+      // Leave the rows as they were. They already say why they failed, and a
+      // failed retry that wipes the reason is worse than one that changes
+      // nothing.
     } finally {
-      setRetrying(null);
+      setRetrying([]);
     }
   }
 
@@ -241,7 +257,8 @@ export default function TriageBoard({ items }: { items: InboundItem[] }) {
               title="Couldn't reach the model"
               items={bands.failed}
               results={results!}
-              onRetry={retryOne}
+              onRetry={(id) => retry([id])}
+              onRetryAll={() => retry(bands.failed.map((i) => i.id))}
               retrying={retrying}
             />
           )}
@@ -291,13 +308,15 @@ function Band({
   items,
   results,
   onRetry,
+  onRetryAll,
   retrying,
 }: {
   title: string;
   items: InboundItem[];
   results: Record<string, TriagedItem>;
   onRetry?: (id: string) => void;
-  retrying?: string | null;
+  onRetryAll?: () => void;
+  retrying?: string[];
 }) {
   return (
     <section>
@@ -312,9 +331,27 @@ function Band({
           item={item}
           triaged={results[item.id]}
           onRetry={onRetry}
-          retrying={retrying === item.id}
+          retrying={retrying?.includes(item.id)}
         />
       ))}
+
+      {/* Only worth showing once there's more than one. At real volume an
+          outage lands a page of these, and clearing them one row at a time
+          isn't a recovery path — this re-triages the whole band in a single
+          request. With one failure the row's own button already says it. */}
+      {onRetryAll && items.length > 1 && (
+        <div className="band-foot">
+          <button
+            className="retry retry-all"
+            onClick={onRetryAll}
+            disabled={(retrying?.length ?? 0) > 0}
+          >
+            {(retrying?.length ?? 0) > 0
+              ? `Retrying ${retrying!.length}…`
+              : `Retry all ${items.length}`}
+          </button>
+        </div>
+      )}
     </section>
   );
 }

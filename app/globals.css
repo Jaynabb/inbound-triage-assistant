@@ -555,6 +555,15 @@ section + section { margin-top: 42px; }
 .retry:disabled { opacity: 0.45; cursor: progress; }
 .retry:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
 
+/* Sits under the band it clears, aligned with the row buttons above it so the
+   two read as the same control at two scopes. */
+.band-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin: 2px 0 8px;
+}
+.retry-all { border-color: var(--ink); color: var(--ink); }
+
 .tag-review,
 
 /* Once opened, take the whole row so the panel isn't squeezed between the

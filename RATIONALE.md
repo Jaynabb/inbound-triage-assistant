@@ -254,6 +254,12 @@ The fix is to stop batching and trigger on arrival instead, so a clock never
 decides when anything gets looked at. Then Bob is flagged within seconds of
 calling in.
 
+Recovery has to scale with the queue too. A rate limit or an overload doesn't
+fail one message, it fails whatever was in flight — so the failed band has one
+button that re-triages the whole band in a single request. Per-row retry is
+there for a one-off, but clicking through a page of failures isn't a recovery
+path, and at volume that page is what an outage looks like.
+
 That means several triggers, not one, because the queue isn't all email. Of
 these 13, eight are email, three are web-form submissions, one is LinkedIn and
 one is a transcribed voicemail. n8n *watches* a mailbox, but it *receives* a web

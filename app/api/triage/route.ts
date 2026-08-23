@@ -30,17 +30,20 @@ export async function POST(request: Request) {
     let queue = items;
     const body = await request.json().catch(() => null);
     const ids: unknown = body && typeof body === "object" ? (body as any).ids : null;
-    if (Array.isArray(ids) && ids.length > 0) {
-      const wanted = new Set(ids.map(String));
+    const isRetry = Array.isArray(ids) && ids.length > 0;
+    if (isRetry) {
+      const wanted = new Set((ids as unknown[]).map(String));
       queue = items.filter((i) => wanted.has(i.id));
     }
 
     const started = Date.now();
     // Failure injection applies to a full run only, so a retry of a failed
     // message reaches the real API. See injectedFailure in lib/triage.ts.
-    const results = await triageAll(queue, {
-      injectFailures: queue.length === items.length,
-    });
+    // Keyed on whether ids were sent, not on how many came back: retrying every
+    // failed message at once can cover the whole queue, and that's still a
+    // retry. Comparing lengths would re-fire the fault on exactly the request
+    // that's trying to clear it.
+    const results = await triageAll(queue, { injectFailures: !isRetry });
 
     return NextResponse.json({
       results,
