@@ -234,19 +234,11 @@ main {
   color: var(--ink-3);
 }
 
-/* The urgent panel wears the same treatment as the urgent rows, so the count
-   and the messages read as one signal rather than two. */
-.panel-high {
-  --negative-ink-2: var(--ink-3);
-  --negative-rule: var(--urgent);
-
-  background: var(--sheet);
-  border-color: var(--urgent);
-  color: var(--ink);
-}
+/* The count is the only thing that colours. The chip itself matches its
+   neighbours so the filter row reads as one control — a chip that's outlined
+   differently competes with the ring that says which one you're on. The red
+   still ties the count to the urgent rows below it. */
 .panel-high .panel-n { color: var(--urgent); }
-.panel-high .panel-label { color: var(--negative-ink-2); }
-.panel-high:hover:not(:disabled) { border-color: var(--negative-rule); }
 
 .panel-low, .panel-inert, .panel-failed { background: var(--sheet-sunk); }
 .panel-inert .panel-n { color: var(--ink-3); }
@@ -270,13 +262,6 @@ main {
    can see what you're about to switch to whichever way you got there. */
 .panels.is-filtered .panel:not(.is-active):hover:not(:disabled),
 .panels.is-filtered .panel:not(.is-active):focus-visible { opacity: 1; }
-/* Already outlined, so the active state thickens the same red rather than
-   introducing a second colour. */
-.panel-high.is-active {
-  border-color: var(--urgent);
-  box-shadow: inset 0 0 0 1px var(--urgent);
-}
-
 .panel.is-empty { opacity: 0.45; cursor: default; }
 
 @media (max-width: 620px) {
