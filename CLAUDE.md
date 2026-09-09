@@ -108,15 +108,16 @@ making it. Comments explain **why**, not what — match the existing density.
 Prefer deleting a rule over adding a threshold: there is no tunable number
 anywhere in the filter and it should stay that way.
 
-## Showing a change on GitHub
+## Showing a change
 
-After making a change, commit and push it so the diff can be opened in the
-browser. Always surface both links:
+After making a change, commit and push it, then surface all three links —
+the running app first, the diff second:
 
 ```bash
 git add -A && git commit -m "<what changed>" && git push -u origin live-session
 ```
 
+- **the app** — http://localhost:3000 (start it with `npm run dev` if it isn't up)
 - **this change** — `https://github.com/Jaynabb/inbound-triage-assistant/commit/<sha>`
 - **everything so far** — `https://github.com/Jaynabb/inbound-triage-assistant/compare/main...live-session`
 
