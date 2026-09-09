@@ -107,3 +107,18 @@ Small diffs, one change at a time. Say which seam a change belongs to before
 making it. Comments explain **why**, not what — match the existing density.
 Prefer deleting a rule over adding a threshold: there is no tunable number
 anywhere in the filter and it should stay that way.
+
+## Showing a change on GitHub
+
+After making a change, commit and push it so the diff can be opened in the
+browser. Always surface both links:
+
+```bash
+git add -A && git commit -m "<what changed>" && git push -u origin live-session
+```
+
+- **this change** — `https://github.com/Jaynabb/inbound-triage-assistant/commit/<sha>`
+- **everything so far** — `https://github.com/Jaynabb/inbound-triage-assistant/compare/main...live-session`
+
+`main` is the submitted version and is never pushed to. The compare link is the
+running diff of the whole session against it.
